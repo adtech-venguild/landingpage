@@ -1,0 +1,36 @@
+{
+  "name": {
+    "first": "Jose Marie",
+    "middle": "M",
+    "last": "Flores",
+    "full": "Jose Marie M. Flores"
+  },
+  "elementalAffinity": {
+    "codes": "34",
+    "names": [
+      "Air",
+      "Water"
+    ],
+    "label": "Air + Water",
+    "description": "You are a dreamer with empathy. You communicate feelings as much as ideas, making you creative and relatable. People love your imagination and the way you express emotions in words, art, or action. You connect hearts and minds."
+  },
+  "totals": {
+    "experience": 35,
+    "education": 3,
+    "total": 38
+  },
+  "recommendation": {
+    "title": "Apprentice",
+    "rank": "E"
+  },
+  "assets": {
+    "shadow": "assets/default/shadow_m.png",
+    "professional": "assets/professional/0472_nano_m_sa.png",
+    "regionCode": "_sa",
+    "genderCode": "_m"
+  },
+  "raw": {
+    "sectorTopCode": "0472_nano"
+  },
+  "savedAt": "2025-09-13T19:21:18.362Z"
+}

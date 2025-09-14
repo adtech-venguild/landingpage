@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VENGUILD – Adventurer Aptitude Exam</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:transparent; --card:#0f141a; --line:rgba(255,255,255,.12); --text:#e9ecf1; --muted:#a9b4c1; --gold:#ffdf9e; --accent:#37e07d; }
+  *{box-sizing:border-box}
+  html,body{height:100%; margin:0}
+  body{
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    background: var(--bg) url("assets/background/background1.png") center/cover no-repeat fixed;
+    color: var(--text);
+    min-height: 100dvh; display:grid; place-items:center; padding:24px;
+    background-blend-mode: overlay;
+  }
+  .wrap{
+    width:min(1100px,96vw);
+    background:var(--card); border:1px solid var(--line); border-radius:18px;
+    padding:22px; box-shadow:0 20px 60px rgba(0,0,0,.55); animation:fade .5s ease;
+  }
+  @keyframes fade{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+
+  header h1{font-family:Cinzel,serif; font-size: clamp(26px,4.6vw,42px); margin:0; color:var(--gold)}
+  .sub{color:#cfe3ff; margin:4px 0 0; letter-spacing:.04em}
+  .chips{display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 0}
+  .chip{padding:8px 12px; border-radius:999px; border:1px solid #1b2738; background:#0b1015; font-weight:700; color:#cfe6ff; letter-spacing:.02em}
+  .rank{width:44px; height:44px; display:grid; place-items:center; border-radius:10px; border:1px solid #5f80ae; background:#0b1015; color:#cfe6ff; font-weight:900}
+
+  .q{ border:1px solid var(--line); border-radius:14px; background:#0b1015; padding:14px; margin:10px 0; display:grid; gap:12px; }
+  .q .t{font-weight:700; line-height:1.4}
+  .scale{display:grid; grid-template-columns:repeat(5, 1fr); gap:8px}
+  .opt{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    border:1px solid #1b2738; background:#0a1119; border-radius:10px; padding:10px 8px; cursor:pointer;
+    user-select:none; transition:transform .15s ease, border-color .15s ease;
+  }
+  .opt:hover{ transform:translateY(-1px); border-color:#2a3a55 }
+  .opt input{ appearance:none; width:16px; height:16px; border:2px solid #5b7aa7; border-radius:50%; display:inline-block; position:relative }
+  .opt input:checked{ border-color:transparent; background:
+    radial-gradient(circle at 50% 50%, #3fe199 0 50%, transparent 52%),
+    linear-gradient(135deg,#3fe199,#2ccf86) }
+  .legend{display:flex; justify-content:space-between; color:var(--muted); font-size:12px; margin-top:4px}
+
+  .footer{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:16px}
+  .btn{padding:14px 18px; border-radius:14px; font-weight:800; cursor:pointer; font-size:16px;
+    background:linear-gradient(135deg, var(--accent), #2cd18c, #1aa37c); color:#0c1116; border:none; text-decoration:none; box-shadow:0 6px 18px rgba(0,0,0,.45)}
+  .btn[disabled]{opacity:.6; filter:saturate(.5); cursor:not-allowed}
+  .muted{color:var(--muted)}
+  .bar{height:8px; background:#0a141f; border:1px solid #1b2738; border-radius:999px; overflow:hidden}
+  .bar>i{display:block; height:100%; width:0%; background:linear-gradient(90deg, #37e07d, #86ffc6)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Adventurer Aptitude Exam</h1>
+      <p class="sub" id="hello">Welcome to your first quest!</p>
+      <div class="chips" id="stats">
+        <div class="chip" id="aff">Elemental Affinity: —</div>
+        <div class="chip" id="titleChip">Title: —</div>
+        <div class="chip">Total Level: <span id="lvl" style="margin-left:6px;font-weight:900">—</span></div>
+        <div class="chip">Rank:<span id="rankChip">—</span></div>
+      </div>
+      <p class="muted" style="margin-top:8px">Answer honestly. Neutral (X) counts as no preference.</p>
+    </header>
+
+    <div id="questions"></div>
+
+    <div class="footer">
+      <div style="flex:1">
+        <div class="bar"><i id="pbar"></i></div>
+        <div class="muted" id="ptext" style="margin-top:6px">0/0 answered</div>
+      </div>
+      <button class="btn" id="submitBtn" disabled>Finish & Reveal</button>
+    </div>
+  </div>
+
+<script>
+/* ---------- paths ---------- */
+const PATH_EXAM     = 'data/personalitytest.json';
+const PATH_SECTORS  = 'data/sectors.json';
+const PATH_PROGRAMS = 'data/programs.json';
+const PATH_ELEMENTS = 'data/elements.json';
+const PATH_JOBS     = 'data/adventurer_jobs.json';
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const safe = x => (x==null ? '' : String(x));
+const dedup = a => [...new Set(a)];
+const sortDigits = s => s.split('').sort().join('');
+
+async function getJSON(path){
+  const r = await fetch(path,{cache:'no-store'}); if(!r.ok) throw new Error(path+' → HTTP '+r.status);
+  return r.json();
+}
+
+/* ---------- level → title/rank ---------- */
+function levelTitle(total){
+  if(total>=100) return 'Master';
+  if(total>=76)  return 'Advanced II';
+  if(total>=51)  return 'Advanced I';
+  if(total>=26)  return 'Apprentice';
+  return 'Aspirant';
+}
+function baseRankFor(level){
+  return level==='Master' ? 'B' :
+         level==='Advanced II' ? 'C' :
+         level==='Advanced I'  ? 'D' :
+         level==='Apprentice'  ? 'E' : 'F';
+}
+function countVerifications(){
+  try{
+    const v = JSON.parse(localStorage.getItem('venguild_verifications')||'{}')||{};
+    return ['twoIDs','employment','diploma','tor','address','payslip','billing','ecommerce']
+      .reduce((n,k)=> n + (v[k]?1:0), 0);
+  }catch{return 0;}
+}
+function finalRankFor(level){
+  const L=['F','E','D','C','B','A','S'];
+  const b=L.indexOf(baseRankFor(level));
+  const steps=Math.min(countVerifications(), L.length-1-b);
+  return L[b+steps];
+}
+
+/* ---------- header stats (from preloaded profile) ---------- */
+(async function loadHeader(){
+  const raw = localStorage.getItem('venguild_complete_profile');
+  if (!raw) return;
+  const profile = JSON.parse(raw);
+
+  // name
+  const first = safe(profile?.name?.first||'Adventurer');
+  const last  = safe(profile?.name?.last||'');
+  $('#hello').textContent = `Welcome to your first quest, ${[first,last].filter(Boolean).join(' ')}!`;
+
+  // totals
+  const expTotal = (profile.experience||[]).reduce((s,x)=> s + Number(x.computedLevel || (x.years||0)*(x.multiplier||0)), 0);
+  const eduTotal = (profile.education||[]).reduce((s,x)=> s + Number(x.multiplier||0), 0);
+  const total    = expTotal + eduTotal;
+  const title    = levelTitle(total);
+  const rank     = finalRankFor(title);
+
+  $('#lvl').textContent = isFinite(total) ? total : '—';
+  $('#titleChip').textContent = `Title: ${title}`;
+  $('#rankChip').textContent  = rank || '—';
+
+  // affinity (derive via data files only)
+  try{
+    const [sectors, programs, elements] = await Promise.all([
+      getJSON(PATH_SECTORS), getJSON(PATH_PROGRAMS), getJSON(PATH_ELEMENTS)
+    ]);
+
+    const sectorCodeToElem = new Map((sectors||[]).map(s=>[
+      String(s.Code||s.code||'').trim(), Number(s.ElementCode||s.elementCode||0)
+    ]));
+    const progToElem = (programs||[]).reduce((m,p)=>{
+      m[String(p.Program||p.title||'').trim().toLowerCase()] = Number(p.ElementCode||p.elementCode||0);
+      return m;
+    },{});
+
+    const expElems = (profile.experience||[]).map(x=> sectorCodeToElem.get(String(x.code||'').trim()) || 0);
+    const eduElems = (profile.education||[]).map(e=> progToElem[String(e.program||'').trim().toLowerCase()] || 0);
+    const comboKey = sortDigits(dedup([...expElems, ...eduElems].filter(Boolean).map(String)).join(''));
+
+    let affinityName = '—';
+    if (comboKey){
+      const hit = (await getJSON(PATH_ELEMENTS)).find(it => sortDigits(String(it.Code||it.code||''))===comboKey);
+      affinityName = hit ? (hit.Combination||hit.name||hit.title||'—') : '—';
+    }
+    $('#aff').textContent = `Elemental Affinity: ${affinityName}`;
+  }catch{
+    $('#aff').textContent = `Elemental Affinity: —`;
+  }
+})();
+
+/* ---------- build the exam (from JSON only) ---------- */
+const NAMES  = ['sa','a','n','d','sd'];
+const LABELS = ['Strongly Agree','Agree','Neutral (X)','Disagree','Strongly Disagree'];
+let QUESTIONS = [];
+
+function buildQuestions(list){
+  QUESTIONS = list || [];
+  const grid = $('#questions'); grid.innerHTML='';
+  QUESTIONS.forEach((q,i)=>{
+    const card = document.createElement('div'); card.className='q';
+    card.innerHTML = `<div class="t">${q.text||'(missing text)'}</div>`;
+    const scale = document.createElement('div'); scale.className='scale';
+    NAMES.forEach((nm, idx)=>{
+      const id = `q${i}_${nm}`;
+      const lab = document.createElement('label'); lab.className='opt'; lab.setAttribute('for', id);
+      const input = document.createElement('input'); input.type='radio'; input.name=`q${i}`; input.id=id; input.value=nm;
+      lab.appendChild(input); lab.appendChild(document.createTextNode(LABELS[idx]));
+      scale.appendChild(lab);
+    });
+    card.appendChild(scale);
+    const legend = document.createElement('div'); legend.className='legend';
+    card.appendChild(legend);
+    grid.appendChild(card);
+  });
+  updateProgress();
+}
+
+function updateProgress(){
+  const total = QUESTIONS.length;
+  const answered = QUESTIONS.reduce((n,_,i)=> n + (document.querySelector(`input[name="q${i}"]:checked`)?1:0), 0);
+  $('#pbar').style.width = (total? Math.round(100*answered/total):0) + '%';
+  $('#ptext').textContent = `${answered}/${total} answered`;
+  $('#submitBtn').disabled = answered < total;
+}
+document.addEventListener('change', (e)=>{ if (e.target.matches('input[type="radio"]')) updateProgress(); });
+
+(async function boot(){
+  const data = await getJSON(PATH_EXAM);
+  if (!data || !Array.isArray(data.questions)) throw new Error('personalitytest.json is missing a "questions" array.');
+  buildQuestions(data.questions);
+})();
+
+/* ---------- scoring + substitutions + job mapping ---------- */
+function pick(dim,a,b){ return (dim[a]===dim[b]) ? a : (dim[a] > dim[b] ? a : b); }
+
+document.getElementById('submitBtn').addEventListener('click', async ()=>{
+  // Tally
+  const dims = { AD:{A:0,D:0}, VE:{V:0,E:0}, NT:{N:0,T:0}, UR:{U:0,R:0} };
+  const totals   = { AD:0, VE:0, NT:0, UR:0 };
+  const neutrals = { AD:0, VE:0, NT:0, UR:0 };
+  let Ecount=0, Rcount=0;
+
+  QUESTIONS.forEach((q,i)=>{
+    const val = (document.querySelector(`input[name="q${i}"]:checked`)||{}).value;
+    const pair = q.pair; if (!pair) return;
+    totals[pair] += 1;
+    const agreeER = q.exaltedForAgree || q.er1 || q.exAgree || q.erAgree || null; // 'E' or 'R' or null
+    const disagreeER = q.rootedForDisagree || q.er2 || q.exDisagree || q.erDisagree || null;
+
+    const pos = (val==='sa'||val==='a');
+    const neg = (val==='d'||val==='sd');
+    const neu = (val==='n');
+
+    if (neu) { neutrals[pair] += 1; return; }
+
+    if (pos) {
+      if (q.d1) dims[pair][q.d1] += 1;
+      if (agreeER==='E') Ecount++;
+      if (agreeER==='R') Rcount++;
+    }
+    if (neg) {
+      if (q.d2) dims[pair][q.d2] += 1;
+      if (disagreeER==='E') Ecount++;
+      if (disagreeER==='R') Rcount++;
+    }
+  });
+
+  // Base results
+  const base = {
+    AD: neutrals.AD === totals.AD ? 'X' : pick(dims.AD,'A','D'),
+    VE: neutrals.VE === totals.VE ? 'X' : pick(dims.VE,'V','E'),
+    NT: neutrals.NT === totals.NT ? 'X' : pick(dims.NT,'N','T'),
+    UR: neutrals.UR === totals.UR ? 'X' : pick(dims.UR,'U','R'),
+  };
+
+  // Substitutions for all-neutral sections
+  const res = {...base};
+  // AD from VE
+  if (res.AD==='X' && res.VE!=='X'){ res.AD = (res.VE==='V' ? 'A' : 'D'); }
+  // NT <-> UR
+  if (res.NT==='X' && res.UR!=='X'){ res.NT = (res.UR==='U' ? 'N' : 'T'); }
+  if (res.UR==='X' && res.NT!=='X'){ res.UR = (res.NT==='N' ? 'U' : 'R'); }
+
+  // Monster case (two or more X)
+  const neutralDims = Object.values(res).filter(v=>v==='X').length;
+  const ER = (Ecount===Rcount) ? '' : (Ecount>Rcount ? 'E' : 'R');
+
+  // Pull profile totals to decide suffix rule and header context
+  const profile = JSON.parse(localStorage.getItem('venguild_complete_profile')||'{}');
+  const expTotal = (profile.experience||[]).reduce((s,x)=> s + Number(x.computedLevel || (x.years||0)*(x.multiplier||0)), 0);
+  const eduTotal = (profile.education||[]).reduce((s,x)=> s + Number(x.multiplier||0), 0);
+  const totalLevel = expTotal + eduTotal;
+  const title = levelTitle(totalLevel);
+  const rank  = finalRankFor(title);
+
+  if (neutralDims >= 2){
+    // Creeps outcome
+    const result = {
+      code4: null, code: null, ER,
+      title, rank, level: totalLevel,
+      monster: true,
+      avatar: "assets/default/creeps.png",
+      note: "Too many Neutrals (X). Self-awareness requires choices—try again with fewer X’s!"
+    };
+    localStorage.setItem('venguild_personality', JSON.stringify(result));
+    window.location.href = 'loadingpage.html';
+    return;
+  }
+
+  // Build codes
+  const code4 = res.AD + res.VE + res.NT + res.UR;
+  const code  = (totalLevel >= 51 && ER) ? `${code4}-${ER}` : code4;
+
+  // Map job from adventurer_jobs.json
+  let job = null;
+  try{
+    const jobs = await getJSON(PATH_JOBS);
+    // match by personality + (optional) ER
+    job = jobs.find(j =>
+      String(j.personality||j.ADVR||j.advr||'').toUpperCase() === code4.toUpperCase() &&
+      (totalLevel < 51
+        ? (!String(j.exaltedRooted||'').trim() || String(j.exaltedRooted).toUpperCase()==='N/A')
+        : (String(j.exaltedRooted||'').toUpperCase() === ER)
+      )
+    ) || null;
+  }catch{}
+
+  const result = {
+    code4, code, ER,
+    level: totalLevel, title, rank,
+    monster: false,
+    // job mapping (guarded)
+    finalCode: job?.finalCode || job?.FinalCode || null,
+    jobClass: job?.jobClass || job?.JobClass || null,
+    jobType: job?.jobType || job?.JobType || null,
+    epithet: job?.epithet || job?.Epithet || null,
+    description: job?.description || job?.Description || null
+  };
+
+  localStorage.setItem('venguild_personality', JSON.stringify(result));
+  window.location.href = 'loadingpage.html';
+});
+</script>
+</body>
+</html>

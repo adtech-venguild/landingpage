@@ -1,0 +1,29 @@
+[
+  {"country":"Brunei","zone":"Southeast Asia","code":"_sea"},
+  {"country":"Cambodia","zone":"Southeast Asia","code":"_sea"},
+  {"country":"East Timor (Timor-Leste)","zone":"Southeast Asia","code":"_sea"},
+  {"country":"Indonesia","zone":"Southeast Asia","code":"_sea"},
+  {"country":"Laos","zone":"Southeast Asia","code":"_sea"},
+  {"country":"Malaysia","zone":"Southeast Asia","code":"_sea"},
+  {"country":"Myanmar (Burma)","zone":"Southeast Asia","code":"_sea"},
+  {"country":"Philippines","zone":"Southeast Asia","code":"_sea"},
+  {"country":"Singapore","zone":"Southeast Asia","code":"_sea"},
+  {"country":"Thailand","zone":"Southeast Asia","code":"_sea"},
+  {"country":"Vietnam","zone":"Southeast Asia","code":"_sea"},
+
+  {"country":"China","zone":"Northeast Asia","code":"_nea"},
+  {"country":"Japan","zone":"Northeast Asia","code":"_nea"},
+  {"country":"North Korea","zone":"Northeast Asia","code":"_nea"},
+  {"country":"South Korea","zone":"Northeast Asia","code":"_nea"},
+  {"country":"Mongolia","zone":"Northeast Asia","code":"_nea"},
+  {"country":"Taiwan*","zone":"Northeast Asia","code":"_nea"},
+
+  {"country":"Afghanistan","zone":"South Asia","code":"_sa"},
+  {"country":"Bangladesh","zone":"South Asia","code":"_sa"},
+  {"country":"Bhutan","zone":"South Asia","code":"_sa"},
+  {"country":"India","zone":"South Asia","code":"_sa"},
+  {"country":"Maldives","zone":"South Asia","code":"_sa"},
+  {"country":"Nepal","zone":"South Asia","code":"_sa"},
+  {"country":"Pakistan","zone":"South Asia","code":"_sa"},
+  {"country":"Sri Lanka","zone":"South Asia","code":"_sa"}
+]

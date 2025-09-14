@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VENGUILD – A Fantasy Career Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: url("/assets/background/background1.png");
+      --overlay: rgba(6, 12, 15, 0.55);
+      --gold:#d6b676;
+      --gold-2:#b9974f;
+      --teal:#0f5b59;
+      --teal-2:#0a4645;
+      --text:#e9ecf1;
+      --muted:#c9d1db;
+      --accent:#2cd18c;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0}
+    body{
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color: var(--text);
+      line-height: 1.5;
+      background: #0c1116;
+    }
+    /* Hero background */
+    .hero{
+      position:relative; min-height:100dvh; display:grid; place-items:center; overflow:hidden;
+      background-image: linear-gradient(to bottom, rgba(6,12,18,.55), rgba(6,12,18,.6)), var(--bg);
+      background-size: cover; background-position: center; background-repeat:no-repeat;
+    }
+    /* Subtle vignette */
+    .hero:after{
+      content:""; position:absolute; inset:0; pointer-events:none;
+      box-shadow: inset 0 0 220px rgba(0,0,0,.55);
+    }
+    /* Logo */
+    .logo{
+      position:absolute; top:80px; left:50%; transform:translateX(-50%);
+      width:176px; height:auto;
+      filter: drop-shadow(0 0 6px rgba(255,255,255,0.8)) drop-shadow(0 0 12px rgba(0,0,0,0.6));
+    }
+    .wrap{ position:relative; width:min(1050px, 92vw); text-align:center; padding: clamp(40px, 6vw, 80px) 0; }
+
+    h1{
+      font-family: Cinzel, serif; font-weight:900; letter-spacing: .04em;
+      font-size: clamp(38px, 7vw, 96px); margin: 12px 0 8px;
+      text-shadow: 0 3px 0 rgba(0,0,0,.25), 0 10px 30px rgba(0,0,0,.45);
+    }
+    .subtitle{
+      font-family: Cinzel, serif; font-weight:700; letter-spacing: .15em;
+      font-size: clamp(14px, 2.2vw, 28px); opacity:.92; color: var(--muted);
+      text-transform: uppercase; margin-bottom: clamp(28px, 4.2vw, 36px);
+    }
+
+    /* CTA plaque */
+    .cta{
+      display:inline-grid; place-items:center; gap:14px; margin-top:8px;
+    }
+    .plaque{
+      position:relative; display:inline-block; padding: 18px 32px; min-width: 290px;
+      font-weight:800; letter-spacing:.08em; text-transform:uppercase; font-size: clamp(14px, 2.4vw, 20px);
+      color:#e9f7f4; cursor:pointer; user-select:none; border:none; background:none;
+      filter: drop-shadow(0 10px 16px rgba(0,0,0,.45));
+    }
+    .plaque .inner{
+      background: linear-gradient(#0c6866, #0b5857);
+      padding: 18px 36px; border-radius: 10px; border: 2px solid #063c3b;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.08), inset 0 0 18px rgba(44,209,140,.15), 0 10px 16px rgba(0,0,0,.35);
+    }
+    .plaque:before, .plaque:after{
+      content:""; position:absolute; top:50%; width:20px; height:56px; transform:translateY(-50%);
+      background: linear-gradient(#9a7f43, #6f572b); border:1px solid rgba(0,0,0,.35);
+      clip-path: polygon(0 0, 100% 20%, 100% 80%, 0% 100%);
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,.35));
+    }
+    .plaque:before{ left:-22px }
+    .plaque:after{ right:-22px; transform: translateY(-50%) scaleX(-1); }
+    .plaque:hover .inner{ transform: translateY(-1px); box-shadow: inset 0 0 0 2px rgba(255,255,255,.12), inset 0 0 22px rgba(44,209,140,.22), 0 14px 22px rgba(0,0,0,.45); }
+
+    .tagline{
+      font-family: Cinzel, serif; color:#ffdf9e; font-size: clamp(16px, 2.2vw, 28px); margin-top: clamp(30px, 5vw, 46px);
+      text-shadow: 0 2px 0 rgba(0,0,0,.25), 0 10px 20px rgba(0,0,0,.35);
+    }
+
+    /* Modal */
+    .modal-backdrop{ position: fixed; inset:0; background: rgba(0,0,0,.55); backdrop-filter: blur(2px); display:none; align-items:center; justify-content:center; z-index: 50; }
+    .modal-backdrop[aria-hidden="false"]{ display:flex; }
+    .modal{ background: #0f141a; color:#e8eef5; width:min(560px, 92vw); border-radius: 16px; box-shadow: var(--shadow); border:1px solid rgba(255,255,255,.06); }
+    .modal header{ display:flex; align-items:center; justify-content:space-between; padding:18px 20px; border-bottom:1px solid rgba(255,255,255,.06); }
+    .modal h2{ margin:0; font-size:20px; font-weight:800; letter-spacing:.02em; }
+    .close-btn{ appearance:none; border:none; background:#171f27; color:#c6d2e1; border-radius:10px; padding:8px 12px; cursor:pointer; }
+    .modal main{ padding:18px 20px 6px; }
+
+    .providers{ display:grid; grid-template-columns:1fr; gap:12px; margin-bottom:14px; }
+    .provider{ display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.08); background:#121922; cursor:pointer; font-weight:700; }
+    .provider:hover{ background:#151e29; }
+    .provider svg{ width:20px; height:20px }
+    .provider {
+  color: #ffffff;
+}
+
+    .sep{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:10px; color:#98a7ba; font-size:12px; letter-spacing:.08em; text-transform:uppercase; margin:8px 0 12px; }
+    .sep:before, .sep:after{ content:""; height:1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent); }
+
+    form{ display:grid; gap:10px; }
+    label{ font-size:13px; color:#b8c5d6 }
+    input[type="email"], input[type="text"]{ width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.08); background:#0e1520; color:#e8eef5; }
+    .submit{ background: linear-gradient(#1aa37c,#148c69); border:1px solid #0d6b53; color:white; padding:12px 16px; border-radius:12px; cursor:pointer; font-weight:800; }
+    .submit:hover{ filter:brightness(1.05) }
+
+    .footnote{ padding: 8px 20px 18px; color:#9cb0c7; font-size:12px; }
+
+    /* Toast */
+    .toast{ position:fixed; left:50%; bottom:20px; transform:translateX(-50%) translateY(120%); background:#0d1a12; border:1px solid #0b5; color:#c6ffde; padding:10px 14px; border-radius:12px; box-shadow:var(--shadow); transition:.35s ease; z-index:55; }
+    .toast.show{ transform:translateX(-50%) translateY(0); }
+
+    /* Accessibility helpers */
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+    @media (max-width: 520px){
+      .logo{ width:64px; height:64px; }
+      .plaque:before, .plaque:after{ display:none; }
+    }
+  </style>
+</head>
+<body>
+  <noscript><div style="background:#0b1a23;color:#ffd9a6;padding:10px;text-align:center">Enable JavaScript to complete pre‑registration.</div></noscript>
+
+  <section class="hero" role="img" aria-label="Watercolor fantasy background">
+   <img src="assets/logo.png" alt="VENGUILD logo" class="logo" />
+
+
+    <div class="wrap">
+      <h1>VENGUILD</h1>
+      <div class="subtitle">A Fantasy Career Platform</div>
+
+      <div class="cta">
+        <button class="plaque" id="openModal" aria-haspopup="dialog" aria-controls="preRegModal">
+          <span class="inner">Pre‑Register Now</span>
+        </button>
+        <div class="tagline">Start your epic adventure now!</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="preRegModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modalTitle">
+    <div class="modal" role="document">
+      <header>
+        <h2 id="modalTitle">Join the Founding Adventurers</h2>
+        <button class="close-btn" id="closeModal" aria-label="Close pre‑registration">✕</button>
+      </header>
+      <main>
+        <div class="providers">
+          <button class="provider" data-provider="google" type="button" aria-label="Continue with Google">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21.6 12.227c0-.64-.057-1.255-.163-1.845H12v3.49h5.381a4.6 4.6 0 0 1-2.0 3.014v2.503h3.238c1.895-1.744 2.981-4.31 2.981-7.162Z" fill="#4285F4"/><path d="M12 22c2.7 0 4.969-.895 6.625-2.423l-3.238-2.503c-.9.6-2.053.957-3.387.957-2.605 0-4.816-1.76-5.604-4.123H3.06v2.59A9.997 9.997 0 0 0 12 22Z" fill="#34A853"/><path d="M6.396 13.908A5.997 5.997 0 0 1 6.08 12c0-.662.114-1.303.316-1.908V7.503H3.06A10.002 10.002 0 0 0 2 12c0 1.617.387 3.146 1.06 4.497l3.336-2.589Z" fill="#FBBC05"/><path d="M12 6.38c1.47 0 2.79.505 3.825 1.494l2.869-2.869C16.967 3.288 14.7 2.4 12 2.4 8.06 2.4 4.69 4.68 3.06 7.503l3.336 2.589C7.184 8.14 9.395 6.38 12 6.38Z" fill="#EA4335"/></svg>
+            Continue with Google
+          </button>
+          <button class="provider" data-provider="facebook" type="button" aria-label="Continue with Facebook">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8h2.7l.4-3h-3.1V9.1c0-.9.2-1.5 1.6-1.5h1.7V4.1c-.8-.1-1.7-.2-2.5-.2-2.6 0-4.4 1.6-4.4 4.6V11H7V14h2.9v8h3.6Z"/></svg>
+            Continue with Facebook
+          </button>
+          <button class="provider" data-provider="linkedin" type="button" aria-label="Continue with LinkedIn">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V24h-4V8zm7.5 0h3.8v2.2h.1c.5-1 1.8-2.2 3.7-2.2 3.9 0 4.6 2.6 4.6 6V24h-4v-6.7c0-1.6 0-3.6-2.2-3.6-2.2 0-2.5 1.7-2.5 3.5V24h-4V8z"/></svg>
+            Continue with LinkedIn
+          </button>
+        </div>
+
+        <div class="sep">or</div>
+
+        <form id="emailForm" novalidate>
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" placeholder="you@realm.com" autocomplete="email" required />
+          <button class="submit" type="submit">Continue with Email</button>
+        </form>
+      </main>
+      <div class="footnote">By continuing, you agree to the Quest Terms & Privacy Policy.</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Pre‑registration recorded. We\'ll email your invitation soon. ✨</div>
+
+  <script>
+    const openBtn = document.getElementById('openModal');
+    const modal = document.getElementById('preRegModal');
+    const closeBtn = document.getElementById('closeModal');
+    const toast = document.getElementById('toast');
+    const emailForm = document.getElementById('emailForm');
+
+    function openModal(){
+      modal.setAttribute('aria-hidden','false');
+      // focus first focusable element
+      setTimeout(()=>{
+        const first = modal.querySelector('button.provider, input, [tabindex]');
+        first && first.focus();
+      }, 10);
+      document.addEventListener('keydown', escHandler);
+    }
+    function closeModal(){
+      modal.setAttribute('aria-hidden','true');
+      document.removeEventListener('keydown', escHandler);
+      openBtn.focus();
+    }
+    function escHandler(e){ if(e.key === 'Escape') closeModal(); }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+
+    // Fake social provider click (stub)
+    document.querySelectorAll('.provider').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const p = btn.dataset.provider;
+    // Demo: pretend success, then go to the next page
+    showToast(`Registration successful via ${p}. Redirecting…`);
+    setTimeout(()=>{ window.location.href = 'information.html'; }, 1400);
+  });
+});
+
+    // Email form stub – save to localStorage as demo
+    emailForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const input = emailForm.email;
+      const email = (input.value || '').trim();
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+        input.focus();
+        input.setCustomValidity('Please enter a valid email.');
+        input.reportValidity();
+        return;
+      }
+      input.setCustomValidity('');
+      try{
+        const key = 'venguild_pre_reg_emails';
+        const current = JSON.parse(localStorage.getItem(key) || '[]');
+        if(!current.includes(email)) current.push(email);
+        localStorage.setItem(key, JSON.stringify(current));
+      }catch(err){ /* ignore storage issues in private mode */ }
+      closeModal();
+      showToast('Registration successful! Redirecting…');
+      setTimeout(()=>{ window.location.href = 'information.html'; }, 1400);
+
+    });
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(()=> toast.classList.remove('show'), 2600);
+    }
+  </script>
+</body>
+</html>

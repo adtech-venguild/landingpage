@@ -1,0 +1,21 @@
+[
+  { "title": "Intern / Trainee", "multiplier": 2 },
+  { "title": "Associate / Junior", "multiplier": 3 },
+  { "title": "Specialist / Analyst", "multiplier": 4 },
+  { "title": "Senior Associate / Senior Analyst", "multiplier": 4 },
+  { "title": "Subject Matter Expert (SME)", "multiplier": 5 },
+  { "title": "Team Lead / Assistant Supervisor", "multiplier": 5 },
+  { "title": "Supervisor", "multiplier": 5 },
+  { "title": "Assistant Manager / Deputy Manager", "multiplier": 6 },
+  { "title": "Manager", "multiplier": 6 },
+  { "title": "Senior Manager", "multiplier": 6 },
+  { "title": "Assistant Director / Deputy Director", "multiplier": 7 },
+  { "title": "Director", "multiplier": 7 },
+  { "title": "Senior Director", "multiplier": 7 },
+  { "title": "Vice President (VP)", "multiplier": 8 },
+  { "title": "Senior VP / Executive VP (EVP)", "multiplier": 8 },
+  { "title": "Chief Officer (C-level: COO, CTO, CFO, CMO, etc.)", "multiplier": 8 },
+  { "title": "President (optional in some orgs)", "multiplier": 9 },
+  { "title": "Chief Executive Officer (CEO)", "multiplier": 9 },
+  { "title": "Founder / Owner", "multiplier": 10 }
+]

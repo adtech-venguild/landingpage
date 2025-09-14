@@ -1,0 +1,292 @@
+{
+  "version": 1,
+  "scale": ["Strongly Agree", "Agree", "Neutral", "Disagree", "Strongly Disagree"],
+  "neutral_symbol": "X",
+  "agree_maps_to": "d1",
+  "disagree_maps_to": "d2",
+  "questions": [
+    {
+      "id": "AD1",
+      "text": "I feel energized when meeting new people in social settings.",
+      "pair": "AD",
+      "label": "Active vs. Discreet",
+      "d1": "A",
+      "d2": "D",
+      "er1": "E",
+      "er2": "R"
+    },
+    {
+      "id": "AD2",
+      "text": "I prefer spending my free time alone or with a few close friends.",
+      "pair": "AD",
+      "label": "Active vs. Discreet",
+      "d1": "D",
+      "d2": "A",
+      "er1": "E",
+      "er2": "R"
+    },
+    {
+      "id": "AD3",
+      "text": "I enjoy being the center of attention.",
+      "pair": "AD",
+      "label": "Active vs. Discreet",
+      "d1": "A",
+      "d2": "D",
+      "er1": "R",
+      "er2": "E"
+    },
+    {
+      "id": "AD4",
+      "text": "I often need quiet time after socializing.",
+      "pair": "AD",
+      "label": "Active vs. Discreet",
+      "d1": "D",
+      "d2": "A",
+      "er1": "R",
+      "er2": "E"
+    },
+    {
+      "id": "AD5",
+      "text": "I would rather join a large party than stay home by myself.",
+      "pair": "AD",
+      "label": "Active vs. Discreet",
+      "d1": "A",
+      "d2": "D",
+      "er1": "",
+      "er2": ""
+    },
+    {
+      "id": "AD6",
+      "text": "I gain energy in lively social settings.",
+      "pair": "AD",
+      "label": "Active vs. Discreet",
+      "d1": "A",
+      "d2": "D",
+      "er1": "R",
+      "er2": "E"
+    },
+    {
+      "id": "AD7",
+      "text": "I often need quiet time to process my thoughts.",
+      "pair": "AD",
+      "label": "Active vs. Discreet",
+      "d1": "D",
+      "d2": "A",
+      "er1": "",
+      "er2": ""
+    },
+
+    {
+      "id": "VE1",
+      "text": "I trust facts and real experiences more than abstract theories.",
+      "pair": "VE",
+      "label": "Vigilant vs. Envisioning",
+      "d1": "V",
+      "d2": "E",
+      "er1": "E",
+      "er2": "R"
+    },
+    {
+      "id": "VE2",
+      "text": "I focus more on details than on the big picture.",
+      "pair": "VE",
+      "label": "Vigilant vs. Envisioning",
+      "d1": "V",
+      "d2": "E",
+      "er1": "E",
+      "er2": "R"
+    },
+    {
+      "id": "VE3",
+      "text": "I enjoy exploring possibilities and imagining “what if” scenarios.",
+      "pair": "VE",
+      "label": "Vigilant vs. Envisioning",
+      "d1": "E",
+      "d2": "V",
+      "er1": "E",
+      "er2": "R"
+    },
+    {
+      "id": "VE4",
+      "text": "I like using creativity and new ideas to solve problems.",
+      "pair": "VE",
+      "label": "Vigilant vs. Envisioning",
+      "d1": "E",
+      "d2": "V",
+      "er1": "E",
+      "er2": "R"
+    },
+    {
+      "id": "VE5",
+      "text": "I rely more on present realities than on future possibilities.",
+      "pair": "VE",
+      "label": "Vigilant vs. Envisioning",
+      "d1": "V",
+      "d2": "E",
+      "er1": "",
+      "er2": ""
+    },
+    {
+      "id": "VE6",
+      "text": "I prefer relying on concrete facts over abstract theories.",
+      "pair": "VE",
+      "label": "Vigilant vs. Envisioning",
+      "d1": "V",
+      "d2": "E",
+      "er1": "E",
+      "er2": "R"
+    },
+    {
+      "id": "VE7",
+      "text": "I am not confident to trust my vision of future possibilities more than relying on present details.",
+      "pair": "VE",
+      "label": "Vigilant vs. Envisioning",
+      "d1": "E",
+      "d2": "V",
+      "er1": "R",
+      "er2": "E"
+    },
+
+    {
+      "id": "NT1",
+      "text": "I prefer making decisions based on logic rather than emotions.",
+      "pair": "NT",
+      "label": "Neutral vs. Tactful",
+      "d1": "N",
+      "d2": "T",
+      "er1": "",
+      "er2": ""
+      },
+    {
+      "id": "NT2",
+      "text": "I value fairness and consistency over personal concerns.",
+      "pair": "NT",
+      "label": "Neutral vs. Tactful",
+      "d1": "N",
+      "d2": "T",
+      "er1": "E",
+      "er2": "R"
+    },
+    {
+      "id": "NT3",
+      "text": "I focus on how decisions affect people’s feelings.",
+      "pair": "NT",
+      "label": "Neutral vs. Tactful",
+      "d1": "T",
+      "d2": "N",
+      "er1": "E",
+      "er2": "R"
+    },
+    {
+      "id": "NT4",
+      "text": "I believe harmony in relationships is more important than winning arguments.",
+      "pair": "NT",
+      "label": "Neutral vs. Tactful",
+      "d1": "T",
+      "d2": "N",
+      "er1": "E",
+      "er2": "R"
+    },
+    {
+      "id": "NT5",
+      "text": "I usually follow my head over my heart when making choices.",
+      "pair": "NT",
+      "label": "Neutral vs. Tactful",
+      "d1": "N",
+      "d2": "T",
+      "er1": "",
+      "er2": ""
+    },
+    {
+      "id": "NT6",
+      "text": "I trust logic more than emotions when making decisions.",
+      "pair": "NT",
+      "label": "Neutral vs. Tactful",
+      "d1": "N",
+      "d2": "T",
+      "er1": "E",
+      "er2": "R"
+    },
+    {
+      "id": "NT7",
+      "text": "I often reconsider decisions because of people’s feelings.",
+      "pair": "NT",
+      "label": "Neutral vs. Tactful",
+      "d1": "T",
+      "d2": "N",
+      "er1": "R",
+      "er2": "E"
+    },
+
+    {
+      "id": "UR1",
+      "text": "I like to plan things in advance rather than be spontaneous.",
+      "pair": "UR",
+      "label": "Uniform vs. Resourceful",
+      "d1": "U",
+      "d2": "R",
+      "er1": "",
+      "er2": ""
+    },
+    {
+      "id": "UR2",
+      "text": "I feel more comfortable when my schedule is organized.",
+      "pair": "UR",
+      "label": "Uniform vs. Resourceful",
+      "d1": "U",
+      "d2": "R",
+      "er1": "E",
+      "er2": "R"
+    },
+    {
+      "id": "UR3",
+      "text": "I enjoy keeping options open instead of sticking to a strict plan.",
+      "pair": "UR",
+      "label": "Uniform vs. Resourceful",
+      "d1": "R",
+      "d2": "U",
+      "er1": "",
+      "er2": ""
+    },
+    {
+      "id": "UR4",
+      "text": "I often act on impulse rather than carefully considering first.",
+      "pair": "UR",
+      "label": "Uniform vs. Resourceful",
+      "d1": "R",
+      "d2": "U",
+      "er1": "R",
+      "er2": "E"
+    },
+    {
+      "id": "UR5",
+      "text": "I prefer a clear plan over going with the flow.",
+      "pair": "UR",
+      "label": "Uniform vs. Resourceful",
+      "d1": "U",
+      "d2": "R",
+      "er1": "",
+      "er2": ""
+    },
+    {
+      "id": "UR6",
+      "text": "I prefer structure, deadlines, and clear plans.",
+      "pair": "UR",
+      "label": "Uniform vs. Resourceful",
+      "d1": "U",
+      "d2": "R",
+      "er1": "E",
+      "er2": "R"
+    },
+    {
+      "id": "UR7",
+      "text": "I like keeping my options open and adapting as I go.",
+      "pair": "UR",
+      "label": "Uniform vs. Resourceful",
+      "d1": "R",
+      "d2": "U",
+      "er1": "E",
+      "er2": "R"
+    }
+  ]
+}

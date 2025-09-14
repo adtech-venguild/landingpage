@@ -1,0 +1,11 @@
+[
+  { "title": "Informal Learning", "multiplier": 0.5 },
+  { "title": "Short Course / Certificate", "multiplier": 3 },
+  { "title": "Vocational / Technical Education", "multiplier": 3 },
+  { "title": "Diploma / Associate Degree", "multiplier": 3 },
+  { "title": "Bachelor’s Degree", "multiplier": 6 },
+  { "title": "Postgraduate Diploma / Certificate", "multiplier": 4 },
+  { "title": "Master’s Degree", "multiplier": 7 },
+  { "title": "Doctorate / PhD", "multiplier": 9 },
+  { "title": "Post-Doctoral Research / Fellowship", "multiplier": 10 }
+]

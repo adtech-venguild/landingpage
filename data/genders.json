@@ -1,0 +1,6 @@
+[
+  { "label": "Male", "code": "_m" },
+  { "label": "Female", "code": "_f" },
+  { "label": "Non-Binary", "code": "_f" },
+  { "label": "Prefer not to say", "code": "_f" }
+]
