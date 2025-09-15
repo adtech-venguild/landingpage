@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>VENGUILD — Founding Adventurer</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================================================
+     QUICK KNOBS — tweak these ONLY to move/size things fast
+     ========================================================================= */
+  :root{
+    /* Overall vertical nudge for the center stack (mockups + headline ONLY).
+       Positive values push DOWN; negative values pull UP. Lightning stays put. */
+    --stage-up: -6vmin;
+
+    /* Positions (as percentages of viewport height) BEFORE the --stage-up offset. */
+    --pair-top: 36%;          /* baseline top for the mockup pair */
+    --headline-top: 56%;      /* baseline top for the headline (at the feet) */
+
+    /* Pair scale + spacing */
+    --stage-scale: 1;         /* scale the whole pair as one unit */
+    --mock-gap: 0vmin;      /* spacing between hero and pro */
+
+    /* Individual mock controls (so you can match their sizes and alignment) */
+    --hero-w: 34vmin;         /* hero width */
+    --pro-w:  22vmin;         /* professional width */
+    --hero-dx: 5vmin;         /* small left(-)/right(+) offset for hero */
+    --pro-dx:  -12vmin;         /* small left(-)/right(+) offset for pro  */
+    --hero-dy:  0vmin;        /* small up(-)/down(+) offset for hero */
+    --pro-dy:   0vmin;        /* small up(-)/down(+) offset for pro  */
+
+    /* Headline spacing + size */
+    --headline-gap: .9vmin;   /* gap between the headline rows */
+    --hbig-size: clamp(18px, 4.2vmin, 40px);
+    --hsmall-size: clamp(16px, 2.7vmin, 26px);
+
+    /* Lightning / murky-water FX (DO NOT MOVE ANCHOR if lightning is correct) */
+    --fx-ellipse-scale-x: 1.35;  /* width of murky oval */
+    --fx-ellipse-scale-y: 0.85;  /* height of murky oval */
+    --fx-offset-y: 0vmin;        /* micro nudge of FX (kept at 0 as requested) */
+
+    /* Badge + logo */
+    --badge-size: clamp(12px, 1.8vmin, 16px);
+    --badge-pad: 10px 14px;
+    --logo-size: clamp(22px, 2.4vmin, 28px);
+    --logo-ring: 24px;
+
+    /* Socials row */
+    --share-gap: 10px;
+    --share-font: clamp(12px, 1.9vmin, 15px);
+    --share-pad-y: 9px;
+    --share-pad-x: 14px;
+
+    /* Palette */
+    --goldA:#ffe6aa; --goldB:#d7b45f; --goldC:#b88930;
+    --text:#e9ecf1; --muted:#a9b4c1;
+  }
+
+  /* =========================================================================
+     BASE
+     ========================================================================= */
+  *{box-sizing:border-box}
+  html,body{height:100%; margin:0}
+  body{
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    color:var(--text);
+    height:100dvh; overflow:hidden; /* no wobble/scroll */
+    display:grid; place-items:center;
+    background:
+      linear-gradient(to bottom, rgba(5,10,16,.5), rgba(5,10,16,.78)),
+      url("assets/background/background2.png");
+    background-size:auto,cover; background-position:center,center;
+    text-shadow:0 1px 2px rgba(0,0,0,.45);
+  }
+
+  /* =========================================================================
+     TOP: logo + FOUNDING STATUS CONFIRMED (side-by-side)
+     ========================================================================= */
+  .topRow{
+    position:fixed; z-index:25; left:50%; top:1.6vh; transform:translateX(-50%);
+    display:inline-flex; align-items:center; gap:12px;
+  }
+  .logoPill{
+    display:inline-grid; place-items:center;
+    width:calc(var(--logo-ring)); height:calc(var(--logo-ring));
+    border-radius:999px; background:rgba(255,255,255,.95);
+    box-shadow:0 6px 16px rgba(0,0,0,.35), 0 0 18px rgba(255,255,255,.55);
+  }
+  .logoPill img{ width:var(--logo-size); height:auto; display:block;
+    filter:drop-shadow(0 0 8px rgba(255,255,255,.8))
+           drop-shadow(0 0 14px rgba(255,255,255,.35));
+  }
+  .badgeTop{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:var(--badge-pad); border-radius:999px;
+    background: rgba(12,18,26,.55);
+    color:#cfe9ff; font-weight:900; letter-spacing:.08em; text-transform:uppercase;
+    font-size: var(--badge-size);
+    box-shadow: 0 8px 22px rgba(0,0,0,.35);
+    border:1px solid rgba(111,227,255,.22);
+    white-space: nowrap;   /* keep it on one line */
+  }
+
+  /* =========================================================================
+     STAGE (center area)
+     ========================================================================= */
+  .stage{
+    position:relative; z-index:10;
+    width:100vw; height:100dvh;
+    pointer-events:none;
+  }
+
+  /* FX canvas (murky water + thin lightning), sits above bg but below mockups */
+  #fx{position:absolute; inset:0; z-index:5; pointer-events:none; display:block;}
+
+  /* Anchor that defines FX center — **DO NOT CHANGE TOP** per your request */
+  #stageAnchor{
+    position:absolute; left:50%; top:34%;
+    transform:translate(-50%,0);
+    width:1px; height:1px; z-index:6;
+  }
+
+  /* =========================================================================
+     MOCKUP PAIR
+     ========================================================================= */
+  .pair{
+    position:absolute; left:50%;
+    /* Keep lightning fixed; move the pair with --stage-up */
+    top:calc(var(--pair-top) + var(--stage-up));
+    transform:translate(-50%, -50%) scale(var(--stage-scale));
+    display:flex; align-items:flex-end; justify-content:center; gap:var(--mock-gap);
+    z-index:8; pointer-events:none;
+  }
+
+  /* Individual mock images; you can tune sizes and offsets with vars above */
+  #mockHero{ width:var(--hero-w); height:auto; object-fit:contain;
+    filter: drop-shadow(0 14px 28px rgba(0,0,0,.55));
+    transform:translate(var(--hero-dx), var(--hero-dy));
+    opacity:0; transition:opacity .5s ease;
+  }
+  #mockPro{ width:var(--pro-w); height:auto; object-fit:contain;
+    filter: drop-shadow(0 14px 28px rgba(0,0,0,.55));
+    transform:translate(var(--pro-dx), var(--pro-dy));
+    opacity:0; transition:opacity .5s ease;
+  }
+  #mockHero.loaded, #mockPro.loaded{ opacity:1 }
+  @supports (scale:1){
+    @keyframes breathe { 0%,100%{ scale:1; translate:0 0 } 50%{ scale:1.02; translate:0 -3px } }
+    #mockHero.alive, #mockPro.alive{ animation:breathe 5.2s ease-in-out infinite; transform-origin:50% 25% }
+  }
+
+  /* =========================================================================
+     HEADLINE (solid fonts, right on the feet, no boxes)
+     ========================================================================= */
+  .headline{
+    position:absolute; left:50%;
+    top:calc(var(--headline-top) + var(--stage-up));
+    transform:translate(-50%,-50%); z-index:12; text-align:center; pointer-events:auto;
+    line-height:1.08;
+  }
+  .hBig{
+    font-family:Cinzel,serif;
+    font-size:var(--hbig-size); font-weight:900; margin:0 0 var(--headline-gap);
+    background:linear-gradient(180deg, var(--goldA) 20%, var(--goldB) 60%, var(--goldC) 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 2px 0 rgba(0,0,0,.45), 0 20px 50px rgba(0,0,0,.55);
+  }
+  .hSmall{
+    font-family:Cinzel,serif;
+    font-size:var(--hsmall-size); font-weight:900; margin:0 0 .35vmin;
+    background:linear-gradient(180deg, var(--goldA) 20%, var(--goldB) 60%, var(--goldC) 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 2px 0 rgba(0,0,0,.45), 0 12px 30px rgba(0,0,0,.5);
+  }
+
+  /* Copy row: invisible link + small copy button */
+  .copyRow{ display:inline-flex; align-items:center; gap:10px; margin:.8vmin 0 0; pointer-events:auto; }
+  .inviteLink{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+  .copyBtn{
+    display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
+    padding:.55em .9em; border-radius:999px; border:1px solid rgba(255,244,198,.75);
+    font-weight:900; letter-spacing:.02em; font-size:clamp(12px,1.8vmin,16px);
+    color:#2b1b00; background:linear-gradient(135deg,#ffe27a,#ffd35a,#ffb800);
+    box-shadow:0 10px 20px rgba(0,0,0,.45), 0 0 16px rgba(255,216,112,.55), inset 0 0 10px rgba(255,255,255,.28);
+    text-decoration:none;
+  }
+  .copyBtn:hover{ transform:translateY(-1px); filter:saturate(1.05) brightness(1.04) }
+
+  .note{ margin:.9vmin 0 0; font-weight:800; color:#dfe6f3; font-size:clamp(14px, 1.9vmin, 18px); text-shadow:0 2px 10px rgba(0,0,0,.45); }
+
+  /* =========================================================================
+     SOCIALS — bottom, one line ALWAYS (no dock/box), no wrapping
+     ========================================================================= */
+  .shares{
+    position:fixed; left:50%; bottom:max(8px, env(safe-area-inset-bottom)); transform:translateX(-50%);
+    z-index:22; display:flex; flex-wrap:nowrap; gap:var(--share-gap); align-items:center; justify-content:center;
+    white-space:nowrap;
+  }
+  .shareBtn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:var(--share-pad-y) var(--share-pad-x);
+    border-radius:999px; font-weight:800; color:#e9f2ff; text-decoration:none;
+    border:1px solid rgba(255,255,255,.14); box-shadow:0 10px 20px rgba(0,0,0,.35);
+    font-size:var(--share-font); line-height:1;
+  }
+  .shareBtn:hover{ transform:translateY(-2px) scale(1.04); filter:brightness(1.08) saturate(1.06) }
+  .shareBtn svg{ width:18px; height:18px }
+  .fb{ background:#1877F2; border-color:#1877F2 }
+  .x{  background:#0f1419; border-color:#2a2f36 }
+  .ig{ background: radial-gradient(circle at 30% 107%, #c56206 0%, #fd5949 45%, #d6249f 60%, #285AEB 90%); border-color:rgba(255,255,255,.25) }
+  .li{ background:#0a66c2; border-color:#0a66c2 }
+
+  /* =========================================================================
+     RESPONSIVE — keep socials on one line; nudge sizes on tight phones
+     ========================================================================= */
+  @media (max-width: 820px) and (orientation: portrait){
+    :root{
+      --hero-w: 55vmin;
+      --pro-w:  35vmin;
+      --hero-dx: 8vmin;         /* small left(-)/right(+) offset for hero */
+      --pro-dx:  -17vmin; 
+      --mock-gap: 0vmin;
+      --stage-scale: 0.9;
+      --share-font: clamp(11px, 2.4vw, 13px);
+      --share-pad-y: 8px;
+      --share-pad-x: 12px;
+    }
+    /* Keep FX where it is; just adjust stack positions */
+    .pair{ top:calc(26% + var(--stage-up)); }
+    .headline{ top:calc(48% + var(--stage-up)); }
+  }
+
+  /* Extra-tight screens: slightly compress spacing so it never wraps */
+  @media (max-width: 800px){
+    :root{ --share-gap: 1px; --share-pad-x: 10px; --share-font: 11px; }
+  }
+
+  /* Very wide landscape tweaks */
+  @media (min-aspect-ratio: 16/9){
+    :root{ --stage-scale: 1; }
+    .pair{ top:calc(35% + var(--stage-up)); }
+    .headline{ top:calc(50% + var(--stage-up)); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ==============================================================
+       TOP: logo + founding badge (side-by-side with white-highlighted logo)
+       ============================================================== -->
+  <div class="topRow" role="banner" aria-label="Founding confirmed">
+    <div class="logoPill"><img src="assets/logo.png" alt="VENGUILD"></div>
+    <div class="badgeTop">FOUNDING STATUS CONFIRMED</div>
+  </div>
+
+  <!-- ==============================================================
+       CENTER STAGE
+       ============================================================== -->
+  <section class="stage" aria-label="Ceremony Stage">
+    <!-- FX canvas (murky water oval + thin lightning) -->
+    <canvas id="fx" aria-hidden="true"></canvas>
+
+    <!-- IMPORTANT: FX anchor is fixed; do not change per your instruction -->
+    <span id="stageAnchor" aria-hidden="true"></span>
+
+    <!-- Two mockups, centered, perfectly juxtaposed with equal widths by default -->
+    <div class="pair" id="pair">
+      <img id="mockHero" class="mock" alt="Adventurer">
+      <img id="mockPro"  class="mock" alt="Professional">
+    </div>
+
+    <!-- Headline — solid fonts, sits right at their feet -->
+    <div class="headline" id="headline">
+      <h2 class="hBig" id="hFirst">CONGRATULATIONS, —!</h2>
+      <div class="hSmall">YOU ARE THE #1001</div>
+      <div class="hSmall">FOUNDING ADVENTURER</div>
+
+      <!-- invisible link kept in DOM; small copy button lives here -->
+      <div class="copyRow">
+        <code id="inviteLink" class="inviteLink"></code>
+        <button id="copyBtn" class="copyBtn" type="button">✂ Copy Invite Link</button>
+      </div>
+
+      <div class="note">⚙️ <strong>Portal under construction.</strong></div>
+    </div>
+  </section>
+
+  <!-- ==============================================================
+       BOTTOM SOCIALS — pinned to the very bottom, one line, no dock box
+       ============================================================== -->
+  <nav class="shares" aria-label="Share">
+    <a class="shareBtn fb" id="fbShare"  href="#" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M22 12.07C22 6.48 17.52 2 11.93 2S2 6.48 2 12.07c0 5.02 3.66 9.19 8.44 9.93v-7.02H7.9v-2.91h2.54V9.41c0-2.5 1.49-3.88 3.77-3.88 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.91h-2.34V22c4.78-.74 8.44-4.91 8.44-9.93z"/></svg>
+      Facebook
+    </a>
+    <a class="shareBtn x" id="xShare"   href="#" target="_blank" rel="noopener">X / Twitter</a>
+    <a class="shareBtn ig" id="igShare"  href="#" target="_blank" rel="noopener">Instagram</a>
+    <a class="shareBtn li" id="liShare"  href="#" target="_blank" rel="noopener">LinkedIn</a>
+  </nav>
+
+<script>
+/* ============================================================================
+   Tiny helpers
+   ============================================================================ */
+const $ = s => document.querySelector(s);
+const safe = x => (x==null ? '' : String(x));
+
+async function getJSON(p){
+  const r = await fetch(p, {cache:'no-store'});
+  if(!r.ok) throw new Error(p+' → '+r.status);
+  return r.json();
+}
+
+/* ============================================================================
+   Invisible invite link + copy + socials
+   ============================================================================ */
+const fallbackInvite = location.origin + '/?ref=' + (localStorage.getItem('venguild_ref') || 'founder1001');
+const inviteLink = localStorage.getItem('venguild_invite_link') || fallbackInvite;
+$('#inviteLink').textContent = inviteLink;
+
+$('#copyBtn').addEventListener('click', async () => {
+  try{ await navigator.clipboard.writeText(inviteLink); }catch{ window.prompt('Copy your invite link:', inviteLink); }
+});
+
+const enc = encodeURIComponent;
+const text = 'Join me as a Founding Adventurer in VENGUILD — the portal opens soon!';
+const url  = enc(inviteLink);
+$('#fbShare').href = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+$('#xShare').href  = `https://twitter.com/intent/tweet?url=${url}&text=${enc(text)}&via=VENGUILD`;
+$('#igShare').href = inviteLink; // IG mobile apps handle this
+$('#liShare').href = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+
+/* Center the share popup windows nicely */
+[['fbShare',620,640],['xShare',620,560],['liShare',620,600],['igShare',520,560]].forEach(([id,w,h])=>{
+  const a = document.getElementById(id);
+  a.addEventListener('click',e=>{
+    if(id==='igShare') return; /* normal redirect */
+    e.preventDefault();
+    const dualLeft = window.screenLeft ?? window.screenX;
+    const dualTop  = window.screenTop  ?? window.screenY;
+    const W = innerWidth || document.documentElement.clientWidth || screen.width;
+    const H = innerHeight || document.documentElement.clientHeight || screen.height;
+    const left = Math.max(0,(W-w)/2 + dualLeft);
+    const top  = Math.max(0,(H-h)/2 + dualTop);
+    window.open(a.href,'vg_share',`toolbar=no,menubar=no,status=no,location=no,scrollbars=yes,resizable=yes,width=${w},height=${h},top=${top},left=${left},noopener=yes,noreferrer=yes`);
+  });
+});
+
+/* ============================================================================
+   Load mockups using the SAME final-code logic used in unlock flow
+   ============================================================================ */
+(async function mountMockups(){
+  const profileRaw = localStorage.getItem('venguild_complete_profile');
+  const resultRaw  = localStorage.getItem('venguild_personality');
+  const profile = profileRaw ? JSON.parse(profileRaw) : {};
+  const result  = resultRaw  ? JSON.parse(resultRaw)  : {};
+
+  /* First name in headline */
+  const firstName = safe(profile?.name?.first || 'Adventurer');
+  $('#hFirst').textContent = `CONGRATULATIONS, ${firstName}!`;
+
+  /* Region code */
+  let regionCode = '';
+  try{
+    const countries = await getJSON('data/country_ethnicity.json');
+    if (Array.isArray(countries)){
+      const c = countries.find(x => safe(x.Country||x.country||x.name).toLowerCase() === safe(profile.citizenship).toLowerCase());
+      if (c){ const rc=safe(c.code||c.Code||c.region||''); regionCode = rc.startsWith('_') ? rc.slice(1) : rc; }
+    }
+  }catch{}
+
+  /* Gender code */
+  let gCode = 'm';
+  try{
+    const genders = await getJSON('data/genders.json');
+    if (Array.isArray(genders) && profile.gender){
+      const row = genders.find(x => safe(x.Gender||x.gender||x.name).toLowerCase() === safe(profile.gender).toLowerCase());
+      if (row) gCode = safe(row.Code||row.code||gCode).toLowerCase();
+    }else{
+      const g = (profile.gender||'').toLowerCase();
+      gCode = (g==='m'||g==='male')?'m':'f';
+    }
+  }catch{}
+
+  /* Final code derivation (same approach) */
+  const advr = safe(result.advrCode || result.code4 || (result.code||'').split('-')[0] || '').toUpperCase();
+  const ERraw = safe(result.exaltedRooted || result.ER || ((result.code||'').split('-')[1]||'')).toUpperCase();
+
+  const expTotal = (profile.experience||[]).reduce((s,x)=> s + Number(x.computedLevel || (x.years||0)*(x.multiplier||0)), 0);
+  const eduTotal = (profile.education||[]).reduce((s,x)=> s + Number(x.multiplier||0), 0);
+  const total    = expTotal + eduTotal;
+  const bucket   = total>=100 ? 100 : (total>50 ? 50 : 0);
+
+  let finalCode = '';
+  try{
+    const jobs = await getJSON('data/adventurer_jobs.json');
+    const byPersonality = (jobs||[]).find(j =>
+      Number(j['Required Level'] ?? 0) === bucket &&
+      String(j['Personality'] || '').toUpperCase() === (advr + ((bucket===0)?'':((ERraw==='E'||ERraw==='R')?('-'+ERraw):'')))
+    );
+    const byFields = (jobs||[]).find(j =>
+      Number(j['Required Level'] ?? 0) === bucket &&
+      String(j['ADVR Code']||'').toUpperCase() === advr &&
+      (bucket === 0 ? true : String(j['Exalted/Rooted']||'').toUpperCase() === (ERraw||''))
+    );
+    const byADVROnly = (jobs||[]).find(j =>
+      Number(j['Required Level'] ?? 0) === bucket &&
+      String(j['ADVR Code']||'').toUpperCase() === advr
+    );
+    const jobRow = byPersonality || byFields || byADVROnly || null;
+    finalCode = safe(jobRow?.['Final Code'] || '').replace(/^@/,'').toLowerCase();
+  }catch{}
+
+  /* Hero (adventurer) */
+  const hero = $('#mockHero');
+  function heroErr(msg){ hero.style.display='none'; console.warn(msg); }
+  if (!finalCode){ heroErr('No finalCode'); }
+  else{
+    const heroPath = `assets/adventurers/${finalCode}_${gCode}.png`;
+    const old = hero.onload;
+    hero.onload = ()=>{ old?.(); hero.classList.add('loaded','alive'); };
+    hero.onerror = ()=> heroErr('Hero not found: '+heroPath);
+    hero.src = heroPath;
+  }
+
+  /* Professional (top experience + region + gender) */
+  const top = (profile.experience||[]).slice().sort((a,b)=> (b.computedLevel||0) - (a.computedLevel||0))[0];
+  const pro  = $('#mockPro');
+  if (top?.code && regionCode){
+    const proPath = `assets/professional/${String(top.code).trim()}_${gCode}_${regionCode}.png`;
+    const old = pro.onload;
+    pro.onload = ()=>{ old?.(); pro.classList.add('loaded','alive'); };
+    pro.onerror = ()=> pro.style.display='none';
+    pro.src = proPath;
+  }else{
+    pro.style.display='none';
+  }
+})();
+
+/* ============================================================================
+   Murky-water blur + thin lightning (FX) — CENTERED ON #stageAnchor (fixed)
+   ============================================================================ */
+(() => {
+  const anchor = document.getElementById('stageAnchor');
+  const cvs = document.getElementById('fx');
+  const ctx = cvs.getContext('2d', {alpha:true});
+
+  const mask = document.createElement('canvas'); const mctx = mask.getContext('2d');
+  const offOrig = document.createElement('canvas'); const octx = offOrig.getContext('2d');
+  const offBlur = document.createElement('canvas'); const bctx = offBlur.getContext('2d');
+  const refr = document.createElement('canvas'); const rctx = refr.getContext('2d');
+  const swirl = document.createElement('canvas'); const swx = swirl.getContext('2d');
+
+  const bg = new Image(); bg.src = "assets/background/background2.png";
+
+  let DPR=1,W=0,H=0,drawBox=null, CX=0, CY=0, R=0;
+  let sources=[];
+
+  function sizeToCover(iw, ih, bw, bh){
+    const s=Math.max(bw/iw, bh/ih); const w=iw*s,h=ih*s;
+    return {x:(bw-w)/2,y:(bh-h)/2,w,h};
+  }
+
+  function updateCenter(){
+    const r = anchor.getBoundingClientRect();
+    const sx = window.scrollX || 0, sy = window.scrollY || 0;
+    CX = (r.left + r.right)/2 * DPR + sx*DPR;
+    /* KEEP FX POSITION — only apply tiny --fx-offset-y if needed */
+    const oy = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fx-offset-y')) || 0;
+    CY = ((r.top + r.bottom)/2 + oy) * DPR + sy*DPR;
+
+    R  = Math.max(Math.min(W,H)*0.24, Math.min(W,H)*0.27);
+
+    const gap = Math.max(10*DPR, Math.min(W,H)*0.018);
+    sources = [];
+    for(let dy=-1; dy<=1; dy++){
+      for(let dx=-1; dx<=1; dx++){
+        sources.push({x:CX+dx*gap, y:CY+dy*gap});
+      }
+    }
+  }
+
+  function resize(){
+    DPR = Math.min(2, window.devicePixelRatio||1);
+    W = Math.floor(innerWidth*DPR);
+    H = Math.floor(innerHeight*DPR);
+    [cvs,mask,offOrig,offBlur,refr,swirl].forEach(c=>{ c.width=W; c.height=H; });
+    cvs.style.width=innerWidth+'px'; cvs.style.height=innerHeight+'px';
+    updateCenter();
+    if (bg.complete && bg.naturalWidth) rasterizeBackground();
+  }
+  addEventListener('resize', resize, {passive:true});
+  addEventListener('scroll', updateCenter, {passive:true});
+
+  function rasterizeBackground(){
+    drawBox = sizeToCover(bg.naturalWidth,bg.naturalHeight,W,H);
+    octx.clearRect(0,0,W,H); octx.drawImage(bg, drawBox.x,drawBox.y,drawBox.w,drawBox.h);
+    bctx.clearRect(0,0,W,H);
+    bctx.filter = `blur(${8*DPR}px) saturate(1.06) brightness(1.04)`;
+    bctx.drawImage(bg, drawBox.x,drawBox.y,drawBox.w,drawBox.h);
+    bctx.filter = 'none';
+  }
+  bg.onload = ()=>{ resize(); rasterizeBackground(); };
+  resize();
+
+  class Bolt {
+    constructor(src){
+      this.birth=performance.now();
+      this.life = 100 + Math.random()*140;
+      this.base = (0.8 + Math.random()*0.5) * DPR;
+      this.points=this.#makePath(src);
+    }
+    #makePath(src){
+      const arr=[{x:src.x,y:src.y}];
+      const baseLen=Math.min(W,H)*(0.07 + Math.random()*0.08);
+      const segs = Math.max(13, Math.floor(baseLen/9));
+      let a=Math.random()*Math.PI*2, x=src.x, y=src.y;
+      for(let i=0;i<segs;i++){
+        const step=baseLen/segs;
+        a += (Math.random()-0.5)*1.1;
+        x += Math.cos(a)*step + (Math.random()-0.5)*5*DPR;
+        y += Math.sin(a)*step + (Math.random()-0.5)*5*DPR;
+        arr.push({x,y});
+      }
+      if(Math.random()<0.75){
+        const k=2+Math.floor(Math.random()*3);
+        for(let i=0;i<k;i++){
+          const idx=2+Math.floor(Math.random()*(arr.length-4));
+          const p=arr[idx];
+          arr.push(...this.#branch(p, a + ((Math.random()<0.5?-1:1)*(1.0+Math.random())), baseLen*0.25));
+        }
+      }
+      return arr;
+    }
+    #branch(start, ang, len){
+      const out=[start]; let x=start.x,y=start.y,a=ang;
+      const segs=Math.max(4,Math.floor(len/10));
+      for(let i=0;i<segs;i++){
+        const step=len/segs;
+        a += (Math.random()-0.5)*1.0;
+        x += Math.cos(a)*step + (Math.random()-0.5)*3*DPR;
+        y += Math.sin(a)*step + (Math.random()-0.5)*3*DPR;
+        out.push({x,y});
+      }
+      return out;
+    }
+    alive(t){ return (t-this.birth) < this.life; }
+    alpha(t){
+      const p=(t-this.birth)/this.life;
+      return p<0.25 ? (p/0.25) : (1-(p-0.25)/0.75);
+    }
+    drawMask(t, ctx){
+      const a=this.alpha(t); if(a<=0) return;
+      ctx.save();
+      ctx.globalCompositeOperation='lighter';
+      ctx.lineCap='round'; ctx.lineJoin='round';
+
+      ctx.shadowBlur=6*DPR; ctx.shadowColor='rgba(255,255,255,1)';
+      ctx.strokeStyle=`rgba(255,255,255,${0.65*a})`;
+      ctx.lineWidth=this.base*3.2;
+      ctx.beginPath(); ctx.moveTo(this.points[0].x,this.points[0].y);
+      for(let i=1;i<this.points.length;i++) ctx.lineTo(this.points[i].x,this.points[i].y);
+      ctx.stroke();
+
+      ctx.shadowBlur=3*DPR;
+      ctx.strokeStyle=`rgba(255,255,255,${a})`;
+      ctx.lineWidth=this.base*1.2;
+      ctx.beginPath(); ctx.moveTo(this.points[0].x,this.points[0].y);
+      for(let i=1;i<this.points.length;i++) ctx.lineTo(this.points[i].x,this.points[i].y);
+      ctx.stroke();
+      ctx.restore();
+    }
+    drawThinOverlay(t, ctx){
+      const a=this.alpha(t); if(a<=0) return;
+      ctx.save();
+      ctx.lineCap='round'; ctx.lineJoin='round';
+
+      ctx.globalCompositeOperation='screen';
+      ctx.strokeStyle=`rgba(110,200,255,${0.9*a})`;
+      ctx.shadowBlur=10*DPR; ctx.shadowColor='rgba(110,200,255,.9)';
+      ctx.lineWidth=Math.max(1, this.base*1.4);
+      ctx.beginPath(); ctx.moveTo(this.points[0].x,this.points[0].y);
+      for(let i=1;i<this.points.length;i++) ctx.lineTo(this.points[i].x,this.points[i].y);
+      ctx.stroke();
+
+      ctx.strokeStyle=`rgba(255,255,255,${0.98*a})`;
+      ctx.shadowBlur=6*DPR; ctx.shadowColor='rgba(255,255,255,.9)';
+      ctx.lineWidth=Math.max(0.6, this.base*0.55);
+      ctx.beginPath(); ctx.moveTo(this.points[0].x,this.points[0].y);
+      for(let i=1;i<this.points.length;i++) ctx.lineTo(this.points[i].x,this.points[i].y);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  const bolts=[]; 
+  let nextSpawn=0, burstUntil=0;
+
+  function spawnBolts(t){
+    if (t > nextSpawn){
+      if (Math.random() < 0.12) burstUntil = t + 220 + Math.random()*220;
+      const inBurst = t < burstUntil;
+      const delay = inBurst ? (22 + Math.random()*26) : (70 + Math.random()*90);
+      nextSpawn = t + delay;
+
+      const count = inBurst ? (2 + (Math.random()*3|0)) : (1 + (Math.random()*2|0));
+      for(let i=0;i<count;i++){
+        const src = sources[(Math.random()*sources.length)|0];
+        bolts.push(new Bolt(src));
+      }
+    }
+  }
+
+  function drawSources(){
+    ctx.save();
+    ctx.globalCompositeOperation='screen';
+    for(const s of sources){
+      const A = 0.05 + Math.random()*0.05;
+      const Rr = 7*DPR + Math.random()*4*DPR;
+      const g = ctx.createRadialGradient(s.x,s.y,0, s.x,s.y,Rr);
+      g.addColorStop(0, `rgba(160,220,255,${A})`);
+      g.addColorStop(1, 'rgba(160,220,255,0)');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(s.x,s.y,Rr,0,Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function buildMask(t){
+    mctx.clearRect(0,0,W,H);
+
+    /* main soft ellipse behind the mockups */
+    mctx.save();
+    mctx.translate(CX, CY);
+    mctx.scale(
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fx-ellipse-scale-x')),
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fx-ellipse-scale-y'))
+    );
+    const g = mctx.createRadialGradient(0,0,R*0.15, 0,0,R);
+    g.addColorStop(0, 'rgba(255,255,255,0.85)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    mctx.fillStyle=g;
+    mctx.beginPath(); mctx.arc(0,0,R,0,Math.PI*2); mctx.fill();
+    mctx.restore();
+
+    /* slow swirl */
+    swx.clearRect(0,0,W,H);
+    swx.save();
+    swx.translate(CX, CY);
+    swx.scale(1.2, 0.72);
+    swx.rotate(t*0.0006);
+    swx.globalAlpha = 0.25;
+    swx.filter = `blur(${16*DPR}px)`;
+    for(let k=0;k<3;k++){
+      swx.rotate((Math.PI*2)/3);
+      swx.beginPath();
+      let rr = Math.max(80*DPR, R*0.35), a = 0;
+      swx.moveTo(rr*Math.cos(a), rr*Math.sin(a));
+      for(let i=0;i<240;i++){
+        a += 0.09;
+        rr += 0.55*DPR + Math.sin(i*0.09+t*0.0004)*0.4*DPR;
+        swx.lineTo(rr*Math.cos(a), rr*Math.sin(a));
+      }
+      swx.strokeStyle='rgba(255,255,255,0.7)';
+      swx.lineWidth=30*DPR; swx.lineCap='round'; swx.stroke();
+    }
+    swx.restore(); swx.filter='none';
+
+    mctx.globalCompositeOperation='lighter';
+    mctx.drawImage(swirl,0,0);
+    mctx.globalCompositeOperation='source-over';
+
+    /* add lightning to the mask */
+    for(let i=bolts.length-1;i>=0;i--){
+      const b = bolts[i];
+      if(!b.alive(t)) bolts.splice(i,1);
+      else b.drawMask(t, mctx);
+    }
+  }
+
+  function drawFrame(t){
+    spawnBolts(t);
+    buildMask(t);
+
+    /* 1) blurred copy through mask */
+    ctx.clearRect(0,0,W,H);
+    ctx.globalCompositeOperation='source-over';
+    ctx.drawImage(offBlur,0,0);
+    ctx.globalCompositeOperation='destination-in';
+    ctx.drawImage(mask,0,0);
+
+    /* 2) slow refraction */
+    const shiftX = Math.sin(t*0.0008)*0.8*(window.devicePixelRatio||1);
+    const shiftY = Math.cos(t*0.0006)*0.5*(window.devicePixelRatio||1);
+    rctx.clearRect(0,0,W,H);
+    rctx.drawImage(offOrig, shiftX, shiftY);
+    rctx.globalCompositeOperation='destination-in';
+    rctx.drawImage(mask,0,0);
+    rctx.globalCompositeOperation='source-over';
+    ctx.globalAlpha = 0.45; ctx.drawImage(refr,0,0); ctx.globalAlpha = 1;
+
+    /* 3) crisp blue-edged bolts on top */
+    for(const b of bolts) b.drawThinOverlay(t, ctx);
+
+    /* 4) tiny source glows */
+    drawSources();
+
+    requestAnimationFrame(drawFrame);
+  }
+  requestAnimationFrame(drawFrame);
+})();
+</script>
+</body>
+</html>

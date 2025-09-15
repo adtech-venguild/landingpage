@@ -26,8 +26,6 @@
   .btn{display:inline-block; background:linear-gradient(135deg, var(--accent), #1aa37c); color:#0b1015; font-weight:800; text-decoration:none; padding:12px 18px; border-radius:12px}
   .btn.ghost{background:transparent; border:1px dashed #355; color:#9fd}
   @media (max-width:900px){ .grid{grid-template-columns:1fr} .images .stack{width:100%; height:360px} }
-
-  /* tiny orb preview (kept small & translucent) */
   .orbs{display:flex; gap:8px; margin-top:8px}
   .orb{--c:#fff; width:22px; height:22px; border-radius:50%;
         background: radial-gradient(circle at 32% 28%, transparent 0 38%, rgba(0,0,0,.55) 100%),
@@ -80,6 +78,24 @@
       <h4 style="margin:14px 0 6px">Level Breakdown</h4>
       <pre id="outLevelBreakdown">—</pre>
 
+      <!-- NEW: Personality Result -->
+      <h3 style="margin:18px 0 8px">Personality Result</h3>
+      <div class="kv">
+        <div><div class="k">ADVR Code</div><div class="v"><code id="outADVR">—</code></div></div>
+        <div><div class="k">Exalted/Rooted</div><div class="v"><code id="outExRo">—</code></div></div>
+        <div><div class="k">Personality</div><div class="v"><code id="outPersona">—</code></div></div>
+      </div>
+
+      <!-- NEW: Mapped Job -->
+      <h3 style="margin:18px 0 8px">Mapped Job (by Required Level bucket)</h3>
+      <div class="kv">
+        <div><div class="k">Bucket (Required Level)</div><div class="v"><code id="outBucket">—</code></div></div>
+        <div><div class="k">Job Class</div><div class="v"><code id="outMapClass">—</code></div></div>
+        <div><div class="k">Job Rank</div><div class="v"><code id="outMapRank">—</code></div></div>
+        <div><div class="k">Final Code</div><div class="v"><code id="outMapFinal">—</code></div></div>
+        <div><div class="k">Epiteth</div><div class="v"><code id="outMapEpiteth">—</code></div></div>
+      </div>
+
       <div class="cta">
         <a id="saveJson" class="btn ghost" href="#">💾 Save profile JSON</a>
         <a href="personalitytest.html" class="btn">Take the personality test →</a>
@@ -97,19 +113,21 @@
 <script>
 /* ---------- config / paths ---------- */
 const PATHS = {
-  countries: 'data/country_ethnicity.json',   // country -> region code (e.g., "sea")
-  programs : 'data/programs.json',            // Program/title -> ElementCode
-  elements : 'data/elements.json',            // Combination/Description + Code like "1","12","134"
-  sectors  : 'data/sectors.json'              // Code -> ElementCode (experience → element)
+  countries: 'data/country_ethnicity.json',
+  programs : 'data/programs.json',
+  elements : 'data/elements.json',
+  sectors  : 'data/sectors.json',
+  jobs     : 'data/adventurer_jobs.json'   // NEW
 };
+const PERSONALITY_KEY = 'venguild_personality'; // expected shape: { advrCode:'DENR', exaltedRooted:'E'|'R'|'n/a', personality:'DENR' }
+
 const ELEM_NAME = {1:'Earth',2:'Fire',3:'Air',4:'Water',5:'Aether'};
-const ORB_COLOR = { // Earth = dark brown, Aether = green
-  '1':'#5b3a1e','2':'#ff6a6a','3':'#4da3ff','4':'#7ef2b0','5':'#37e07d'
-};
+const ORB_COLOR = {'1':'#5b3a1e','2':'#ff6a6a','3':'#4da3ff','4':'#7ef2b0','5':'#37e07d'};
 
 /* ---------- tiny utils ---------- */
 const $ = s => document.querySelector(s);
 async function safeJSON(path){ try{ const r=await fetch(path,{cache:'no-store'}); if(!r.ok) throw 0; return await r.json(); }catch{return [];}}
+
 function genderCode(g){ return (g && g.toLowerCase()==='m') ? '_m' : '_f'; }
 function regionCodeFor(country, countries){
   const row = (countries||[]).find(x=>{
@@ -147,7 +165,7 @@ function findElementDesc(codeStr, list){
   return null;
 }
 
-/* ---------- Title & Rank logic (same rules you’ve been using) ---------- */
+/* ---------- Title & Rank logic ---------- */
 function levelTitle(total){
   if(total>=100) return 'Master';
   if(total>=76)  return 'Advanced II';
@@ -176,24 +194,52 @@ function finalRankFor(level){
   return L[bI+steps];
 }
 
-/* ---------- main ---------- */
+/* ---------- NEW: Required Level bucket & job mapping ---------- */
+function bucketFromTotal(total){
+  if (total > 100) return 100;
+  if (total > 50)  return 50;
+  return 0;
+}
+function rankPreferenceForBucket(bucket){
+  if (bucket === 100) return ['Master 2','Master 1','Master']; // permissive
+  if (bucket === 50)  return ['Alternate 2','Alternate 1','Alternate'];
+  return ['Base Class'];
+}
+function pickJobMatch(jobs, bucket, advr, exro){
+  const pool = (jobs||[]).filter(j=>{
+    const rl = Number(j['Required Level'] ?? j.RequiredLevel ?? j.requiredLevel ?? 0);
+    const ac = String(j['ADVR Code'] || j.ADVR || j.advr || '').trim().toUpperCase();
+    const er = String(j['Exalted/Rooted'] || j.ExaltedRooted || j.exaltedRooted || '').trim();
+    return rl===bucket && ac===String(advr||'').toUpperCase() && er===String(exro||'');
+  });
+  if (!pool.length) return null;
+
+  const pref = rankPreferenceForBucket(bucket).map(s=>s.toLowerCase());
+  const scored = pool.map(x=>{
+    const jr = String(x['Job Rank']||'').toLowerCase();
+    const score = Math.max(...pref.map((p,i)=> jr.includes(p) ? (100 - i) : -1));
+    return {row:x, score};
+  }).sort((a,b)=>b.score - a.score);
+  return scored[0]?.row || pool[0];
+}
+
 (async function main(){
   // Read raw payload
   const saved = localStorage.getItem('venguild_complete_profile');
   $('#dump').textContent = saved || 'No profile found. Please complete your profile first.';
   if (!saved){
-    // show quick fallback CTA
     $('.cta')?.insertAdjacentHTML('afterbegin','<a href="information.html" class="btn">Complete your profile →</a>');
     return;
   }
   const payload = JSON.parse(saved);
 
-  // Load reference data
-  const [countries, programs, elements, sectors] = await Promise.all([
+  // Load reference data (including jobs)
+  const [countries, programs, elements, sectors, jobs] = await Promise.all([
     safeJSON(PATHS.countries),
     safeJSON(PATHS.programs),
     safeJSON(PATHS.elements),
-    safeJSON(PATHS.sectors)
+    safeJSON(PATHS.sectors),
+    safeJSON(PATHS.jobs)
   ]);
 
   // Mappings
@@ -211,7 +257,7 @@ function finalRankFor(level){
   const profCode = top?.code || '';
   const profPath = (profCode && gCode && rCode) ? `assets/professional/${profCode}${gCode}${rCode}.png` : '';
 
-  // Elemental affinity: union of ALL exp elements + education elements
+  // Elemental affinity
   const expElemCodes = (payload.experience||[]).map(x => sectorCodeToElem.get(String(x.code||'').trim()) || 0);
   const eduElems = [];
   for (const e of (payload.education||[])) {
@@ -220,7 +266,7 @@ function finalRankFor(level){
     const ec = Number(row?.ElementCode || row?.elementCode || 0);
     if (ec) eduElems.push(ec);
   }
-  const allElemCodes = uniqueSortedDigits([...expElemCodes, ...eduElems]); // e.g., "35"
+  const allElemCodes = uniqueSortedDigits([...expElemCodes, ...eduElems]);
   const elemNames = namesFromCodes(allElemCodes);
   const descHit = findElementDesc(allElemCodes, elements);
   const description = descHit?.description || '—';
@@ -254,7 +300,7 @@ function finalRankFor(level){
     payload?.name?.last || ''
   ].filter(Boolean).join(' ').trim();
 
-  // Paint UI
+  // Paint base UI
   $('#outName').textContent      = nameFull || '—';
   $('#outElemNames').textContent = comboLabel || '—';
   $('#outElemCode').textContent  = allElemCodes || '—';
@@ -275,9 +321,8 @@ function finalRankFor(level){
   if (shadowPath) $('#imgShadow').src = shadowPath;
   if (profPath)   $('#imgProf').src   = profPath;
 
-  // Tiny orb preview (kept close/small with transparency)
-  const orbs = $('#orbs');
-  orbs.innerHTML = '';
+  // Orbs
+  const orbs = $('#orbs'); orbs.innerHTML = '';
   allElemCodes.split('').forEach(d=>{
     if (!ORB_COLOR[d]) return;
     const o = document.createElement('span');
@@ -286,7 +331,43 @@ function finalRankFor(level){
     orbs.appendChild(o);
   });
 
-  // Build compact profile JSON for personality test
+  /* -------- NEW: Personality pull + UI -------- */
+  let advrCode = null, exaltedRooted = null, personality = null;
+  try{
+    const p = JSON.parse(localStorage.getItem(PERSONALITY_KEY) || 'null');
+    // expected: {advrCode:'DENR', exaltedRooted:'E'|'R'|'n/a', personality:'DENR'}
+    advrCode = (p?.advrCode || p?.ADVR || p?.code || '').toUpperCase() || null;
+    exaltedRooted = (p?.exaltedRooted ?? p?.ER ?? 'n/a'); // 'E','R','n/a'
+    personality = (p?.personality || p?.result || advrCode || '').toUpperCase() || null;
+  }catch{}
+
+  // Fallbacks if test not taken yet (leave blank gracefully)
+  $('#outADVR').textContent   = advrCode || '—';
+  $('#outExRo').textContent   = exaltedRooted || '—';
+  $('#outPersona').textContent= personality || '—';
+
+  /* -------- NEW: Bucket + Job mapping -------- */
+  const bucket = bucketFromTotal(totalLevel);
+  $('#outBucket').textContent = String(bucket);
+
+  let mappedJob = null;
+  if (advrCode && exaltedRooted && Array.isArray(jobs) && jobs.length){
+    mappedJob = pickJobMatch(jobs, bucket, advrCode, exaltedRooted);
+  }
+
+  if (mappedJob){
+    $('#outMapClass').textContent   = mappedJob['Job Class'] || '—';
+    $('#outMapRank').textContent    = mappedJob['Job Rank']  || '—';
+    $('#outMapFinal').textContent   = mappedJob['Final Code']|| '—';
+    $('#outMapEpiteth').textContent = mappedJob['Epiteth']   || '—';
+  }else{
+    $('#outMapClass').textContent   = '—';
+    $('#outMapRank').textContent    = '—';
+    $('#outMapFinal').textContent   = '—';
+    $('#outMapEpiteth').textContent = '—';
+  }
+
+  /* -------- Persist compact profile (now includes personality + mapping) -------- */
   const profileSummary = {
     name: {
       first: payload?.name?.first || '',
@@ -295,17 +376,30 @@ function finalRankFor(level){
       full: nameFull
     },
     elementalAffinity: {
-      codes: allElemCodes,           // "35"
-      names: elemNames,              // ["Air","Aether"]
-      label: comboLabel,             // "Air + Aether"
+      codes: allElemCodes,
+      names: elemNames,
+      label: descHit?.combo || comboLabel,
       description
     },
     totals: {
       experience: expTotal,
       education : eduTotal,
-      total     : totalLevel
+      total     : totalLevel,
+      bucket    : bucket                      // NEW
     },
     recommendation: { title, rank },
+    personality: {                            // NEW
+      advrCode: advrCode,
+      exaltedRooted: exaltedRooted,
+      personality: personality
+    },
+    mappedJob: mappedJob ? {                  // NEW
+      jobClass  : mappedJob['Job Class'] || null,
+      jobRank   : mappedJob['Job Rank'] || null,
+      finalCode : mappedJob['Final Code'] || null,
+      epiteth   : mappedJob['Epiteth'] || null,
+      requiredLevel: mappedJob['Required Level'] ?? null
+    } : null,
     assets: {
       shadow: shadowPath || null,
       professional: profPath || null,
@@ -316,10 +410,9 @@ function finalRankFor(level){
     savedAt: new Date().toISOString()
   };
 
-  // Persist for personalitytest.html
   localStorage.setItem('venguild_profile', JSON.stringify(profileSummary));
 
-  // Downloadable venguild_profile.json
+  // Download button
   (function makeDownload(json){
     const a = document.getElementById('saveJson');
     if(!a) return;
