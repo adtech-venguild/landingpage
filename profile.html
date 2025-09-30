@@ -1,0 +1,1041 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VENGUILD – Complete Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===================== OVERLAY STABILITY (FIXED) ===================== */
+.overlay{
+  position: fixed; inset:0; display:none; place-items:stretch;
+  padding:0; background: rgba(4,8,12,.55); backdrop-filter: blur(6px);
+  overscroll-behavior: contain; touch-action: none; -webkit-overflow-scrolling: auto;
+}
+.overlay.show{ display:grid; animation:fadeIn .2s ease; }
+body.modal-open{ overflow:hidden; overscroll-behavior: none; }
+
+/* Full-bleed panel (edge-to-edge) that scrolls internally */
+.panel{
+  margin:0; width:100vw; height:100dvh; max-height:100dvh; overflow:auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  background:var(--card); border:1px solid var(--line); border-radius:0; box-shadow: 0 20px 60px rgba(0,0,0,.55);
+  display:grid; grid-template-columns: 1fr; gap:22px; padding:clamp(16px,2vw,22px);
+}
+
+/* ===================== BASE ===================== */
+:root{ --bg:#0c1116; --card:#0f141a; --muted:#a9b4c1; --text:#e9ecf1; --gold:#ffdf9e; --accent:#37e07d; --line:rgba(255,255,255,.08); --warn:#ff9c6e; --err:#ff6b6b;}
+*{box-sizing:border-box}
+html,body{height:100%; margin:0}
+body{
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background: var(--bg); color: var(--text);
+  min-height: 100dvh; display:grid; place-items:center;
+  background-image: linear-gradient(to bottom, rgba(6,12,18,.55), rgba(6,12,18,.6)), url("assets/background/background1.png");
+  background-size:cover; background-position:center;
+}
+.card{
+  width:min(980px,94vw); background:var(--card); border:1px solid var(--line);
+  border-radius:16px; padding:28px; text-align:center;
+  box-shadow: 0 10px 30px rgba(0,0,0,.45); animation: fadeIn .8s ease;
+}
+@keyframes fadeIn{from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:translateY(0)}}
+.logo{width:116px; display:block; margin:0 auto 6px; filter: drop-shadow(0 0 8px rgba(255,255,255,.6)) drop-shadow(0 0 14px rgba(0,0,0,.7));}
+h1{font-family:Cinzel,serif; font-weight:900; margin:6px 0 8px; font-size: clamp(28px, 4.6vw, 44px); color:var(--gold); text-shadow:0 3px 8px rgba(0,0,0,.6);}
+p.lead{color:#d1dae4; margin:8px auto 0; font-size:17px; max-width:760px}
+.actions{margin-top:18px; display:flex; justify-content:center; gap:12px}
+.btn{
+  padding:14px 22px; border-radius:14px; font-weight:800; cursor:pointer; font-size:17px;
+  background:linear-gradient(135deg, var(--accent), #2cd18c, #1aa37c);
+  color:#0c1116; text-decoration:none; border:none; position:relative; overflow:hidden;
+  box-shadow:0 6px 18px rgba(0,0,0,.5), inset 0 0 8px rgba(255,255,255,.25);
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+.btn:hover{transform:translateY(-2px) scale(1.02); box-shadow:0 10px 24px rgba(0,0,0,.6), inset 0 0 12px rgba(255,255,255,.3)}
+.btn.ghost{background:transparent; border:1px dashed #355; color:#9fd; box-shadow:none}
+.btn.danger{background:linear-gradient(135deg, #ffb4b4, #ff9898); color:#4a0b0b}
+.btn.secondary{background:linear-gradient(135deg, #c6d3e0, #b9c7d6, #a6b6c7); color:#0c1116;}
+
+/* Snapshot */
+.snapshot{display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:center; margin:14px 0 0; text-align:left}
+.snapshot .avatar{width:112px; height:112px; border-radius:14px; object-fit:contain; background:#0b1015; border:1px solid var(--line); padding:8px}
+.snapshot h3{margin:0; font-family:Cinzel,serif; font-size:clamp(18px,2.6vw,24px); color:#fff}
+.snapshot .muted{color:#b7c3cf; font-size:14px; margin-top:4px}
+.snapshot .group{margin-top:8px}
+.group-label{font-size:12px; letter-spacing:.08em; color:#9fb3c7; text-transform:uppercase; margin-bottom:6px}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:4px}
+.chip{padding:6px 10px; border-radius:999px; background:rgba(55,224,125,.16); border:1px solid rgba(55,224,125,.38); color:#dff9ec; font-weight:700; font-size:12px}
+
+/* Panel content */
+.panel h2{font-family:Cinzel,serif; margin:0 0 12px; font-size: clamp(20px, 3.2vw, 28px); color:var(--gold);}
+.smalllink{margin-left:auto; display:inline-flex; gap:8px; align-items:center; font-weight:800; font-size:14px; cursor:pointer; color:#bfeedd; background:#0e161f; border:1px dashed #1d2b38; padding:8px 12px; border-radius:10px}
+.smalllink[aria-pressed="true"]{color:#0b1611; background:linear-gradient(135deg,#37e07d,#1aa37c); border-color:transparent}
+
+/* Grids */
+form{display:grid; gap:16px; justify-items:stretch}
+.row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px}
+
+/* Dates layout */
+.dates{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.dates .pair{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+@media (max-width:720px){
+  .row, .row3{grid-template-columns:1fr}
+  .dates{grid-template-columns:1fr}
+  .dates .pair{grid-template-columns:1fr 1fr;}
+}
+
+label span{display:block; font-size:12px; letter-spacing:.08em; color:var(--muted); margin-bottom:6px; text-transform:uppercase}
+input[type="text"], input[type="date"], input[type="number"], select{
+  width:100%; padding:12px 12px; border-radius:12px; border:1px solid var(--line); background:#0b1015; color:var(--text);
+  outline:none; transition:border .15s ease, box-shadow .15s ease; font-size:15px;
+}
+input:focus, select:focus{border-color:#3dd39b; box-shadow:0 0 0 3px rgba(61,211,155,.18)}
+.is-error{ border-color: var(--err) !important; box-shadow: 0 0 0 3px rgba(255,107,107,.18) !important; }
+[readonly]{opacity:.85}
+
+/* Filter-Select */
+.fs{ position:relative; }
+.fs select{ display:none; }
+.fs-input{
+  width:100%; padding:12px 38px 12px 12px; border-radius:12px;
+  border:1px solid var(--line); background:#0b1015; color:#e9ecf1; font-size:15px;
+  outline:none; transition:border .15s ease, box-shadow .15s ease;
+}
+.fs-input:focus{ border-color:#3dd39b; box-shadow:0 0 0 3px rgba(61,211,155,.18); }
+.fs-caret{
+  position:absolute; right:10px; top:50%; transform:translateY(-50%); pointer-events:none; opacity:.7; font-size:14px;
+}
+.fs-menu{
+  position:absolute; left:0; right:0; top:calc(100% + 6px);
+  max-height:240px; overflow:auto; padding:6px; z-index:10000;
+  background:#0b1015; border:1px solid #223046; border-radius:12px; display:none;
+  box-shadow:0 12px 30px rgba(0,0,0,.55);
+}
+.fs.open .fs-menu{ display:block; }
+.fs-item{
+  display:block; width:100%; text-align:left; cursor:pointer; user-select:none;
+  background:#0d141f; border:1px solid #1b2738; color:#e9ecf1;
+  border-radius:8px; padding:8px 10px; margin:4px 0; font-weight:600;
+}
+.fs-item:hover{ background:#152234; }
+.fs-item.active{
+  background:linear-gradient(135deg,#37e07d,#1aa37c); color:#0c1116; border-color:transparent;
+}
+/* hard lock styling */
+.fs.locked .fs-input{ pointer-events:none; opacity:.55 }
+.fs.locked .fs-caret{ opacity:.35 }
+
+/* fieldset etc */
+fieldset{border:1px solid var(--line); border-radius:14px; padding:14px; margin:0; background:#0b1015;}
+legend{padding:0 8px; color:#94a3b8; font-size:12px; letter-spacing:.08em; text-transform:uppercase}
+.stack{display:grid; gap:10px}
+.inline{display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap}
+
+/* Footer */
+.footer{display:flex; justify-content:flex-end; gap:10px; margin-top:6px;}
+@media (max-width:540px){ .footer{justify-content:center} }
+
+/* Debug */
+.result{margin-top:8px; background:#0b1015; border:1px solid #223046; border-radius:12px; padding:12px; text-align:left}
+.result pre{margin:0; white-space:pre-wrap; word-break:break-word; color:#9ad6bf; font-size:13px}
+
+/* --- Tiny Date Picker (CENTERED MODAL) --- */
+.dp {
+  position: fixed; z-index: 99999; left:50%; top:50%; transform:translate(-50%,-50%);
+  background:#0b1015; color:#e9ecf1; border:1px solid #223046; border-radius:12px; width: 292px;
+  box-shadow:0 22px 60px rgba(0,0,0,.65); padding:10px; user-select:none;
+}
+.dp header{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+.dp header .btn { background:#101722; border:1px solid #223046; color:#cfe6ff; border-radius:10px; padding:6px 10px; font-weight:700; cursor:pointer; }
+.dp header .label { font-weight:800; letter-spacing:.03em; cursor:pointer }
+.dp .grid { display:grid; grid-template-columns: repeat(7, 1fr); gap:6px; }
+.dp .cell { text-align:center; padding:8px 0; border-radius:8px; cursor:pointer; background:#0d141f; border:1px solid #1b2738; font-weight:600; }
+.dp .cell.muted { opacity:.45; }
+.dp .cell.disabled { opacity:.35; cursor:not-allowed; }
+.dp .cell:hover:not(.disabled){ background:#152234; }
+.dp .cell.active { background:linear-gradient(135deg,#37e07d,#1aa37c); color:#0c1116; border-color:transparent; }
+.dp .years { display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; }
+.dp .year { text-align:center; padding:10px 0; border-radius:10px; cursor:pointer; background:#0d141f; border:1px solid #1b2738; font-weight:700; }
+.dp .year.disabled { opacity:.35; cursor:not-allowed; }
+.dp .year:hover:not(.disabled){ background:#152234; }
+.dp .year.active { background:linear-gradient(135deg,#37e07d,#1aa37c); color:#0c1116; border-color:transparent; }
+
+/* toast-ish warning style */
+.warn{ display:none; margin:6px 0 0; padding:10px 12px; border:1px solid rgba(255,156,110,.5);
+  color:#fff3ec; background:rgba(255,156,110,.1); border-radius:12px; font-weight:700;}
+.warn.show{display:block;}
+.note{ display:none; margin:6px 0 0; padding:8px 10px; border:1px dashed rgba(255,156,110,.6);
+  color:#ffd7c2; background:rgba(255,156,110,.1); border-radius:10px; font-weight:700;}
+.note.show{display:block;}
+</style>
+</head>
+<body>
+
+<div class="card" id="heroCard">
+  <img src="assets/logo.png" alt="VENGUILD logo" class="logo" />
+  <h1>Job Quest — Part I complete.</h1>
+  <p class="lead" id="heroLead">Now finish your profile to lock in perks and get matched faster.</p>
+
+  <!-- Snapshot of prelim selections -->
+  <div class="snapshot" id="snapshot" style="display:none">
+    <img id="snapAvatar" class="avatar" src="assets/adventurers/_placeholder.png" alt="Adventurer">
+    <div>
+      <h3 id="snapName">Adventurer</h3>
+      <div class="muted" id="snapSub">—</div>
+
+      <div class="group">
+        <div class="group-label">Desired Adventurer</div>
+        <div class="chips" id="snapAdv"></div>
+      </div>
+
+      <div class="group">
+        <div class="group-label">Desired Jobs</div>
+        <div class="chips" id="snapJobs"></div>
+      </div>
+
+      <div class="group">
+        <div class="group-label">Professional Skills</div>
+        <div class="chips" id="snapSkills"></div>
+      </div>
+
+      <div class="group">
+        <div class="group-label">Hobbies &amp; Interests</div>
+        <div class="chips" id="snapInterests"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="openOverlay" type="button">⚔️ Complete Your Profile →</button>
+  </div>
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+    <div>
+      <div style="display:flex; align-items:center; gap:12px">
+        <h2 id="panelTitle" style="margin:0">Complete Profile</h2>
+        <button id="toggleEditBasic" type="button" class="smalllink" aria-pressed="false" title="Edit name, citizenship, and gender">✏️ Edit Basic Info</button>
+      </div>
+
+      <form id="profileForm" novalidate>
+        <div id="formWarn" class="warn"></div>
+
+        <!-- Name -->
+        <div class="row3">
+          <label>
+            <span>Last Name</span>
+            <input type="text" id="lastName" required placeholder="e.g., Flores" readonly>
+          </label>
+          <label>
+            <span>First Name</span>
+            <input type="text" id="firstName" required placeholder="e.g., Jose Marie" readonly>
+          </label>
+          <label>
+            <span>Middle Initial (optional)</span>
+            <input type="text" id="middleInitial" maxlength="1" placeholder="M" readonly>
+          </label>
+        </div>
+
+        <!-- Citizenship / Gender -->
+        <div class="row">
+          <label>
+            <span>Citizenship / Nationality</span>
+            <select id="citizenship" required disabled>
+              <option value="" disabled selected>Select citizenship…</option>
+            </select>
+          </label>
+          <label>
+            <span>Gender</span>
+            <select id="gender" required disabled>
+              <option value="" selected disabled>Select gender…</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Non-binary">Non-Binary</option>
+              <option value="Prefer not to say">Prefer not to say</option>
+            </select>
+          </label>
+        </div>
+
+        <!-- DOB / Current Address -->
+        <div class="row">
+          <label>
+            <span>Date of Birth</span>
+            <input type="text" id="dob" required placeholder="mm/dd/yyyy" autocomplete="bday" readonly>
+          </label>
+          <label>
+            <span>Current Address</span>
+            <input type="text" id="address" placeholder="Street, City, Region" autocomplete="street-address">
+          </label>
+        </div>
+
+        <!-- Education -->
+        <fieldset>
+          <legend>Education</legend>
+          <div id="educationList" class="stack"></div>
+          <button type="button" class="btn ghost" id="addEducation">+ Add Education</button>
+        </fieldset>
+
+        <!-- Work Experience -->
+        <fieldset>
+          <legend>Work Experience</legend>
+          <div id="experienceList" class="stack"></div>
+          <button type="button" class="btn ghost" id="addExperience">+ Add Work Experience</button>
+        </fieldset>
+
+        <!-- Training -->
+        <fieldset>
+          <legend>Training / Certification / Workshops</legend>
+          <div id="trainingList" class="stack"></div>
+          <button type="button" class="btn ghost" id="addTraining">+ Add Training / Certification</button>
+        </fieldset>
+
+        <div class="footer">
+          <button type="button" class="btn secondary" id="closeOverlay">Cancel</button>
+          <button type="submit" class="btn">Save →</button>
+        </div>
+
+        <div id="result" class="result" style="display:none;">
+          <pre id="resultPre"></pre>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- data paths ---------- */
+const PATHS = {
+  countries: 'data/country_ethnicity.json',
+  programs: 'data/programs.json',
+  eduLevels: 'data/education_levels.json',
+  sectors: 'data/sectors.json',
+  careerLevels: 'data/career_levels.json',
+  universities: 'data/universities.json',
+  trainings: 'data/trainings.json',
+  institutions: 'data/institutions.json',
+  adventurers: 'data/adventurer_jobs.json'
+};
+
+/* ---------- tiny helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+function el(tag, attrs={}, ...children){
+  const n = document.createElement(tag);
+  for (const [k,v] of Object.entries(attrs)){
+    if (k === 'class') n.className = v;
+    else if (k === 'dataset') Object.assign(n.dataset, v);
+    else if (k.startsWith('on') && typeof v === 'function') n.addEventListener(k.slice(2), v);
+    else if (v !== null && v !== undefined) n.setAttribute(k, v);
+  }
+  for (const c of children) n.appendChild(typeof c==='string' ? document.createTextNode(c) : c);
+  return n;
+}
+async function safeJSON(path){
+  try{ const res = await fetch(path, {cache:'no-store'}); if(!res.ok) throw new Error(`HTTP ${res.status}`); return await res.json(); }
+  catch(e){ console.warn('Missing/bad JSON:', path, e.message); return []; }
+}
+
+/* ---------- in-memory data ---------- */
+const DATA = {
+  countries:[], programs:[], eduLevels:[], sectors:[], careerLevels:[],
+  universities:[], trainings:[], institutions:[], adventurers:[]
+};
+
+/* ---------- FilterSelect ---------- */
+const FilterSelect = (() => {
+  const norm = s => (s||'').normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase();
+  function enhance(sel){
+    if (!sel || sel.dataset.fs === '1') return sel;
+    sel.dataset.fs = '1';
+
+    const wrap = document.createElement('div'); wrap.className = 'fs';
+    const input = document.createElement('input'); input.className='fs-input'; input.type='text';
+    const caret = document.createElement('div'); caret.className='fs-caret'; caret.textContent='▾';
+    const menu  = document.createElement('div'); menu.className='fs-menu';
+    const ph = sel.options?.[0]?.text || 'Select...';
+    input.placeholder = ph;
+
+    sel.parentNode.insertBefore(wrap, sel);
+    wrap.appendChild(sel); wrap.appendChild(input); wrap.appendChild(caret); wrap.appendChild(menu);
+
+    const items = [];
+    for (const opt of sel.options){
+      if (opt.disabled) continue;
+      const li = document.createElement('button');
+      li.type='button'; li.className='fs-item'; li.textContent = opt.text;
+      li.dataset.value = opt.value;
+      li.addEventListener('click', () => {
+        sel.value = opt.value;
+        input.value = opt.text;
+        close();
+        sel.dispatchEvent(new Event('change',{bubbles:true}));
+      });
+      items.push({opt, li, key: norm(opt.text)});
+    }
+
+    function open(){ if (!wrap.classList.contains('open')){ wrap.classList.add('open'); filter(input.value); } }
+    function close(){ wrap.classList.remove('open'); }
+    function filter(q){
+      const nq = norm(q);
+      menu.innerHTML=''; let shown = 0;
+      for (const it of items){
+        if (nq === '' || it.key.includes(nq)){ menu.appendChild(it.li); if (++shown>=300) break; }
+      }
+      if (shown===0){ const none=document.createElement('div'); none.className='fs-item'; none.style.opacity='.55'; none.textContent='No matches'; none.tabIndex=-1; menu.appendChild(none); }
+    }
+
+    const current = sel.options[sel.selectedIndex];
+    if (current && current.value) input.value = current.text;
+
+    input.addEventListener('focus', open);
+    input.addEventListener('input', () => { open(); filter(input.value); });
+    input.addEventListener('keydown', (e)=>{
+      if (e.key === 'ArrowDown'){ open(); const first = menu.querySelector('.fs-item'); first?.focus(); e.preventDefault(); }
+      if (e.key === 'Escape'){ close(); e.stopPropagation(); }
+    });
+    menu.addEventListener('keydown', (e)=>{
+      const arr = [...menu.querySelectorAll('.fs-item')];
+      const i = arr.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown'){ (arr[i+1]||arr[0])?.focus(); e.preventDefault(); }
+      if (e.key === 'ArrowUp'){ (arr[i-1]||arr[arr.length-1])?.focus(); e.preventDefault(); }
+      if (e.key === 'Escape'){ input.focus(); close(); e.preventDefault(); }
+    });
+    document.addEventListener('mousedown', (e)=>{ if (!wrap.contains(e.target)) close(); });
+
+    sel._fs = {wrap,input,menu,open,close,filter};
+    return sel;
+  }
+
+  function lock(sel, locked){
+    sel.disabled = !!locked;
+    const fs = sel._fs;
+    if (fs){
+      if (locked){
+        fs.wrap.classList.add('locked');
+        fs.close?.();
+      }else{
+        fs.wrap.classList.remove('locked');
+      }
+    }
+  }
+
+  return { enhance, lock };
+})();
+
+/* ---------- builders (no enhance here!) ---------- */
+function buildCitizenshipOptions(){
+  const sel = $('#citizenship');
+  const names = [];
+  for (const item of DATA.countries){
+    const name = item.Country || item.name || item.country || '';
+    if (name) names.push(name);
+  }
+  names.sort().forEach(name => sel.appendChild(el('option', {value:name}, name)));
+  // enhance after it's in the DOM (done on boot)
+}
+function buildProgramSelect(){
+  const sel = el('select', { required: true });
+  sel.appendChild(el('option', {value:'', disabled:'', selected:''}, 'Select program…'));
+  DATA.programs.map(p => p.Program || p.title).filter(Boolean).sort()
+    .forEach(t => sel.appendChild(el('option', {value:t}, t)));
+  return sel;
+}
+function buildEduLevelSelect(){
+  const sel = el('select', { required: true });
+  sel.appendChild(el('option', {value:'', disabled:'', selected:''}, 'Select level…'));
+  DATA.eduLevels.forEach(l => sel.appendChild(el('option', {value:l.title, dataset:{mult:l.multiplier}}, l.title)));
+  return sel;
+}
+function buildUniversitySelect(){
+  const sel = el('select', { required: true });
+  sel.appendChild(el('option', {value:'', disabled:'', selected:''}, 'University / Institution…'));
+  const list = (DATA.universities||[])
+    .map(u => u.name || u.University || u.institution || u.title)
+    .filter(Boolean).sort();
+  list.forEach(name => sel.appendChild(el('option', {value:name}, name)));
+  return sel;
+}
+function buildSectorSelect(){
+  const sel = el('select', { required: true });
+  sel.appendChild(el('option', {value:'', disabled:'', selected:''}, 'Select industry…'));
+  const src = DATA.sectors || [];
+  if (!src.length) {
+    sel.appendChild(el('option', {value:'(unavailable)', disabled:''}, '— No industries loaded —'));
+    return sel;
+  }
+  const items = src.map(row => ({
+    industry: (row.Industry || '').trim(),
+    sector:   (row.Sector   || '').trim(),
+    code:      String(row.Code || '').trim(),
+    industryCode: String(row.IndustryCode || '').trim(),
+    sectorCode:   String(row.SectorCode   || '').trim(),
+    element:   (row.Element || '').trim(),
+    elementCode: String(row.ElementCode ?? '')
+  })).filter(i => i.sector && i.code)
+    .sort((a,b)=> (a.industry.localeCompare(b.industry) || a.sector.localeCompare(b.sector)));
+  for (const i of items){
+    sel.appendChild(
+      el('option', {
+        value: i.sector,
+        dataset: {
+          code: i.code,
+          industryCode: i.industryCode,
+          sectorCode: i.sectorCode,
+          element: i.element,
+          elementCode: i.elementCode
+        }
+      }, i.sector)
+    );
+  }
+  return sel;
+}
+function buildCareerLevelSelect(){
+  const sel = el('select', { required: true });
+  sel.appendChild(el('option', {value:'', disabled:'', selected:''}, 'Select job title / level…'));
+  const src = DATA.careerLevels;
+  if (Array.isArray(src) && src.length){
+    src.forEach(l => sel.appendChild(el('option', {value:l.title, dataset:{mult:l.multiplier}}, l.title)));
+  } else {
+    sel.appendChild(el('option', {value:'(unavailable)', disabled:''}, '— No levels loaded —'));
+  }
+  return sel;
+}
+function buildMonthSelect(def=''){
+  const sel = el('select', { required:true });
+  sel.appendChild(el('option', {value:'', disabled:'', selected:''}, 'Month…'));
+  const months = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+  months.forEach(m => sel.appendChild(el('option', {value:m}, m)));
+  if (def) sel.value = def;
+  return sel;
+}
+function buildYearSelect(def=''){
+  const sel = el('select', { required:true });
+  sel.appendChild(el('option', {value:'', disabled:'', selected:''}, 'Year…'));
+  const nowY = new Date().getFullYear();
+  for (let y=nowY; y>=1960; y--) sel.appendChild(el('option', {value:String(y)}, String(y)));
+  if (def) sel.value = def;
+  return sel;
+}
+function buildTrainingTitleSelect(){
+  const sel = el('select', { required:true });
+  sel.appendChild(el('option', {value:'', disabled:'', selected:''}, 'Select training / certification…'));
+  const list = (DATA.trainings||[]).map(t => t.title || t.name).filter(Boolean).sort();
+  list.forEach(t => sel.appendChild(el('option', {value:t}, t)));
+  return sel;
+}
+function buildInstitutionSelect(){
+  const sel = el('select', { required:true });
+  sel.appendChild(el('option', {value:'', disabled:'', selected:''}, 'Organizer / Institution…'));
+  const list = (DATA.institutions||[]).map(i => i.name || i.title).filter(Boolean).sort();
+  list.forEach(n => sel.appendChild(el('option', {value:n}, n)));
+  return sel;
+}
+
+/* ---------- repeatable rows ---------- */
+function educationRow(initial={}){
+  const wrap = el('div', {class:'stack'});
+
+  const rowA = el('div', {class:'row3'});
+  const programSel = buildProgramSelect();
+  const levelSel   = buildEduLevelSelect();
+  const uniSel     = buildUniversitySelect();
+  if (initial.program) programSel.value = initial.program;
+  if (initial.level)   levelSel.value   = initial.level;
+  if (initial.university) uniSel.value  = initial.university;
+  rowA.append(
+    el('label', {}, el('span', {}, 'Program'), programSel),
+    el('label', {}, el('span', {}, 'Education Level'), levelSel),
+    el('label', {}, el('span', {}, 'University / Institution'), uniSel),
+  );
+
+  const rowB = el('div', {class:'row3'});
+  const yStart = buildYearSelect(initial.yearStart||'');
+  const yEnd   = buildYearSelect(initial.yearEnd||'');
+  const gradId = `grad_${Math.random().toString(36).slice(2)}`;
+  const gradWrap = el('label', {for:gradId}, el('span', {}, 'Graduated'));
+  const gradChk  = el('input', {type:'checkbox', id:gradId, checked: !!initial.graduated});
+  gradWrap.appendChild(gradChk);
+  rowB.append(
+    el('label', {}, el('span', {}, 'Year Start'), yStart),
+    el('label', {}, el('span', {}, 'Year End'),   yEnd),
+    gradWrap
+  );
+
+  const removeBtnRow = el('div', {class:'inline'},
+    el('button', {type:'button', class:'btn danger remove-education'}, 'Remove')
+  );
+
+  wrap.append(rowA, rowB, removeBtnRow);
+
+  // Enhance AFTER attaching to DOM
+  setTimeout(()=>[programSel, levelSel, uniSel, yStart, yEnd].forEach(FilterSelect.enhance), 0);
+
+  return wrap;
+}
+function experienceRow(initial={}){
+  const wrap = el('div', {class:'stack'});
+
+  const top = el('div', {class:'row'});
+  const sectorSel = buildSectorSelect();
+  const levelSel  = buildCareerLevelSelect();
+  top.append(
+    el('label', {}, el('span', {}, 'Industry (Work Experience)'), sectorSel),
+    el('label', {}, el('span', {}, 'Job Title / Level'), levelSel)
+  );
+
+  const dates = el('div', {class:'dates'});
+  const startPair = el('div', {class:'pair'});
+  const endPair   = el('div', {class:'pair'});
+  const sm = buildMonthSelect(initial.startMonth||'');
+  const sy = buildYearSelect(initial.startYear||'');
+  const em = buildMonthSelect(initial.endMonth||'');
+  const ey = buildYearSelect(initial.endYear||'');
+
+  startPair.append(
+    el('label', {}, el('span', {}, 'Start Month'), sm),
+    el('label', {}, el('span', {}, 'Start Year'),  sy),
+  );
+  endPair.append(
+    el('label', {}, el('span', {}, 'End Month'),   em),
+    el('label', {}, el('span', {}, 'End Year'),    ey),
+  );
+  dates.append(startPair, endPair);
+
+  const curId = `cur_${Math.random().toString(36).slice(2)}`;
+  const currentRow = el('div', {class:'row'});
+  const currentChk = el('input', {type:'checkbox', id:curId});
+  const currentLbl = el('label', {for:curId}, el('span', {}, 'Currently working here'), currentChk);
+  const currentNote = el('div', {class:'note'}, 'Cannot edit, currently working here.');
+  const filler = el('div', {});
+  currentRow.append(currentLbl, filler);
+  const noteHolder = el('div', {}); noteHolder.appendChild(currentNote);
+
+  function lockEnd(disabled){
+    // disable and clear
+    em.value = disabled ? '' : em.value;
+    ey.value = disabled ? '' : ey.value;
+    em.disabled = !!disabled;
+    ey.disabled = !!disabled;
+    // dim labels
+    [em,ey].forEach(x => x.closest('label').style.opacity = disabled ? .5 : 1);
+    currentNote.classList.toggle('show', !!disabled);
+    // If using filter-select on these, also visually lock the wrappers
+    if (em._fs) em._fs.wrap.classList.toggle('locked', !!disabled);
+    if (ey._fs) ey._fs.wrap.classList.toggle('locked', !!disabled);
+  }
+
+  const remove = el('div', {class:'inline'},
+    el('button', {type:'button', class:'btn danger remove-experience'}, 'Remove')
+  );
+
+  wrap.append(top, dates, noteHolder, currentRow, remove);
+
+  // Enhance AFTER attaching to DOM, then apply lock state
+  setTimeout(()=>{
+    [sectorSel, levelSel, sm, sy, em, ey].forEach(FilterSelect.enhance);
+    lockEnd(false);
+    currentChk.addEventListener('change', ()=> lockEnd(currentChk.checked));
+  }, 0);
+
+  return wrap;
+}
+function trainingRow(initial={}){
+  const wrap = el('div', {class:'stack'});
+  const row1 = el('div', {class:'row'});
+  const titleSel = buildTrainingTitleSelect();
+  const orgSel   = buildInstitutionSelect();
+  row1.append(
+    el('label', {}, el('span', {}, 'Certification / Training Title'), titleSel),
+    el('label', {}, el('span', {}, 'Organizer / Training Institution'), orgSel)
+  );
+
+  const row2 = el('div', {class:'row'});
+  const durNum = el('input', {type:'number', min:'0', step:'1', placeholder:'e.g., 3', value: initial.durationValue ?? '', required:''});
+  const durUnit = el('select', {required:''});
+  ['day(s)','week(s)','month(s)'].forEach(u => durUnit.appendChild(el('option',{value:u}, u)));
+  if (initial.durationUnit) durUnit.value = initial.durationUnit;
+  row2.append(
+    el('label', {}, el('span', {}, 'Duration'), durNum),
+    el('label', {}, el('span', {}, 'Unit'), durUnit)
+  );
+
+  const remove = el('div', {class:'inline'},
+    el('button', {type:'button', class:'btn danger remove-training'}, 'Remove')
+  );
+  wrap.append(row1, row2, remove);
+
+  setTimeout(()=>[titleSel, orgSel, durUnit].forEach(FilterSelect.enhance), 0);
+
+  return wrap;
+}
+
+/* ---------- helpers ---------- */
+function yearsFrom(startMonth, startYear, endMonth, endYear, current){
+  const now = new Date();
+  const sY = parseInt(startYear||'0',10), sM = parseInt(startMonth||'0',10);
+  if (!sY || !sM) return 0;
+  let eY = parseInt(endYear||'0',10), eM = parseInt(endMonth||'0',10);
+  if (current || !eY || !eM){ eY = now.getFullYear(); eM = now.getMonth()+1; }
+  const months = Math.max(0, (eY - sY) * 12 + (eM - sM));
+  return +(months / 12).toFixed(2);
+}
+function suffixForGender(g){ return (String(g).toLowerCase()==='male') ? '_m' : '_f'; }
+
+/* ---------- boot ---------- */
+document.addEventListener('DOMContentLoaded', async () => {
+  const overlay = $('#overlay');
+
+  // Load JSON
+  const [countries, programs, eduLevels, sectors, careerLevels, universities, trainings, institutions, adventurers] = await Promise.all([
+    safeJSON(PATHS.countries),
+    safeJSON(PATHS.programs),
+    safeJSON(PATHS.eduLevels),
+    safeJSON(PATHS.sectors),
+    safeJSON(PATHS.careerLevels),
+    safeJSON(PATHS.universities),
+    safeJSON(PATHS.trainings),
+    safeJSON(PATHS.institutions),
+    safeJSON(PATHS.adventurers)
+  ]);
+  Object.assign(DATA, {countries, programs, eduLevels, sectors, careerLevels, universities, trainings, institutions, adventurers});
+
+  buildCitizenshipOptions();
+  // Enhance once in DOM
+  FilterSelect.enhance($('#gender'));
+  FilterSelect.enhance($('#citizenship'));
+  // Lock gender/citizenship initially (and their enhanced inputs)
+  FilterSelect.lock($('#gender'), true);
+  FilterSelect.lock($('#citizenship'), true);
+
+  // Snapshot from prelim (vg_signup_state)
+  const S = JSON.parse(localStorage.getItem('vg_signup_state') || '{}');
+
+  function fillSnapshot(){
+    const snap = $('#snapshot');
+    if (!S || (!S.firstName && !S.displayName)) return;
+
+    const disp = S.displayName || `${S.firstName||''} ${S.lastName||''}`.trim() || 'Adventurer';
+    const sub  = [S.jobType || null, (S.archetype && S.archetype.jobClass) ? S.archetype.jobClass : null].filter(Boolean).join(' • ') || '—';
+
+    let img = 'assets/adventurers/_placeholder.png';
+    if (S.archetype && S.archetype.final){
+      img = `assets/adventurers/${S.archetype.final}${suffixForGender(S.gender)}.png`;
+    }
+    $('#snapAvatar').src = img;
+    $('#snapAvatar').onerror = function(){ this.onerror=null; this.src='assets/adventurers/_placeholder.png'; };
+
+    $('#snapName').textContent = disp;
+    $('#snapSub').textContent  = sub;
+
+    const chipSpan = txt => `<span class="chip">${txt}</span>`;
+    $('#snapAdv').innerHTML       = [sub].filter(Boolean).map(chipSpan).join(' ');
+    $('#snapJobs').innerHTML      = (S.jobs||[]).slice(0,12).map(chipSpan).join(' ');
+    $('#snapSkills').innerHTML    = (S.skills||[]).slice(0,12).map(chipSpan).join(' ');
+    $('#snapInterests').innerHTML = (S.interests||[]).slice(0,12).map(chipSpan).join(' ');
+
+    snap.style.display = '';
+  }
+
+  function prefillFormFromSignup(){
+    if (!S) return;
+    if (S.lastName)  $('#lastName').value = S.lastName;
+    if (S.firstName) $('#firstName').value = S.firstName;
+    if (S.middleInitial) $('#middleInitial').value = (S.middleInitial||'').slice(0,1);
+
+    // Gender + Country (citizenship) locked and prefilled
+    if (S.gender){
+      const g = ['Male','Female','Non-binary','Prefer not to say'].find(x=>x.toLowerCase()===String(S.gender).toLowerCase());
+      if (g) { $('#gender').value = g; if ($('#gender')._fs) $('#gender')._fs.input.value = g; }
+    }
+    if (S.country){
+      $('#citizenship').value = S.country;
+      if ($('#citizenship')._fs) $('#citizenship')._fs.input.value = S.country;
+    }
+  }
+
+  fillSnapshot();
+  prefillFormFromSignup();
+
+  // Toggle basic info editability
+  const basicInputs = ['lastName','firstName','middleInitial'].map(id=>document.getElementById(id));
+  const basicSelects = [document.getElementById('gender'), document.getElementById('citizenship')];
+  function setBasicLocked(locked){
+    basicInputs.forEach(i => { i.readOnly = locked; i.tabIndex = locked? -1 : 0; });
+    basicSelects.forEach(s => FilterSelect.lock(s, locked));
+    const btn = document.getElementById('toggleEditBasic');
+    btn.setAttribute('aria-pressed', !locked);
+    btn.textContent = locked ? '✏️ Edit Basic Info' : '✅ Done Editing';
+  }
+  setBasicLocked(true);
+  document.getElementById('toggleEditBasic').addEventListener('click', ()=>{
+    const locked = basicInputs[0].readOnly;
+    setBasicLocked(!locked);
+    if (!locked) document.getElementById('address').focus();
+  });
+
+  // CTA open overlay
+  document.getElementById('openOverlay').addEventListener('click', ()=>{
+    overlay.classList.add('show');
+    document.body.classList.add('modal-open');
+    const firstEmpty = ['dob','address'].map(id=>document.getElementById(id)).find(el=>!el.value);
+    setTimeout(()=> (firstEmpty||document.getElementById('dob')).focus(), 50);
+  });
+
+  document.getElementById('closeOverlay').addEventListener('click', ()=>{
+    const ok = confirm('Are you sure you want to cancel? Any unsaved changes will be lost.');
+    if (!ok) return;
+    overlay.classList.remove('show');
+    document.body.classList.remove('modal-open');
+  });
+
+  // Add row buttons
+  document.getElementById('addEducation').addEventListener('click', (e)=>{
+    e.preventDefault();
+    document.getElementById('educationList').appendChild(educationRow());
+  });
+  document.getElementById('addExperience').addEventListener('click', (e)=>{
+    e.preventDefault();
+    document.getElementById('experienceList').appendChild(experienceRow());
+  });
+  document.getElementById('addTraining').addEventListener('click', (e)=>{
+    e.preventDefault();
+    document.getElementById('trainingList').appendChild(trainingRow());
+  });
+
+  // Remove via delegation
+  document.addEventListener('click', (e)=>{
+    if (e.target.classList.contains('remove-education')) { e.preventDefault(); e.target.closest('.stack')?.remove(); }
+    if (e.target.classList.contains('remove-experience')) { e.preventDefault(); e.target.closest('.stack')?.remove(); }
+    if (e.target.classList.contains('remove-training'))  { e.preventDefault(); e.target.closest('.stack')?.remove(); }
+  });
+
+  /* ----- Centered DOB picker ----- */
+  const DOB_MIN = new Date(1900, 0, 1);
+  function maxDobDate() {
+    const t = new Date();
+    return new Date(t.getFullYear()-16, t.getMonth(), t.getDate());
+  }
+  const pad = n => (n<10?'0':'')+n;
+  const toISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const toDisplay = d => `${pad(d.getMonth()+1)}/${pad(d.getDate())}/${d.getFullYear()}`;
+  (function initDobPicker(){
+    const input = document.getElementById('dob');
+    if (!input) return;
+    let shown = false, view = 'day';
+    let cur = new Date(2000, 0, 1);
+    const maxDOB = maxDobDate();
+    const val = (input.value || '').trim();
+    if (val && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
+      const [Y,M,D] = val.split('-').map(Number);
+      cur = new Date(Y, M-1, D);
+    } else {
+      cur = new Date(maxDOB);
+    }
+    const pop = document.createElement('div');
+    pop.className = 'dp'; pop.style.display = 'none'; document.body.appendChild(pop);
+    function clamp(d){ if (d < DOB_MIN) return new Date(DOB_MIN); if (d > maxDOB) return new Date(maxDOB); return d; }
+    function renderHeader(c){
+      const h=document.createElement('header');
+      const prev=Object.assign(document.createElement('button'),{className:'btn',textContent:'◀'}); prev.onclick=()=>{ if(view==='day')cur.setMonth(cur.getMonth()-1); else cur.setFullYear(cur.getFullYear()-9); render(); };
+      const label=Object.assign(document.createElement('div'),{className:'label'}); label.textContent=(view==='day')?cur.toLocaleString(undefined,{month:'long',year:'numeric'}):`${cur.getFullYear()-4} – ${cur.getFullYear()+4}`; label.onclick=()=>{view=(view==='day'?'year':'day'); render();};
+      const next=Object.assign(document.createElement('button'),{className:'btn',textContent:'▶'}); next.onclick=()=>{ if(view==='day')cur.setMonth(cur.getMonth()+1); else cur.setFullYear(cur.getFullYear()+9); render(); };
+      h.append(prev,label,next); c.appendChild(h);
+    }
+    function renderDays(container){
+      const grid=document.createElement('div'); grid.className='grid';
+      for (const s of ['Su','Mo','Tu','We','Th','Fr','Sa']){ const head=document.createElement('div'); head.className='cell muted'; head.style.fontWeight='800'; head.textContent=s; grid.appendChild(head); }
+      const y=cur.getFullYear(), m=cur.getMonth(), first=new Date(y,m,1), startIdx=first.getDay(), daysInMonth=new Date(y,m+1,0).getDate();
+      const prevDays = new Date(y, m, 0).getDate();
+      for (let i=startIdx-1; i>=0; i--){ const d=document.createElement('div'); d.className='cell muted disabled'; d.textContent=String(prevDays - i); grid.appendChild(d); }
+      for (let day=1; day<=daysInMonth; day++){
+        const dEl=document.createElement('div'); dEl.className='cell'; dEl.textContent=String(day);
+        const dateObj=new Date(y,m,day);
+        const disabled=(dateObj<DOB_MIN) || (dateObj>maxDOB);
+        if (disabled) dEl.classList.add('disabled');
+        const valISO=(input.value||'').trim();
+        if (valISO){ const [Y,M,D]=valISO.split('-').map(Number); if (Y===y && (M-1)===m && D===day) dEl.classList.add('active'); }
+        if (!disabled){ dEl.onclick=()=>{ const picked=clamp(new Date(y,m,day)); input.value=toISO(picked); input.placeholder=toDisplay(picked); hide(); }; }
+        grid.appendChild(dEl);
+      }
+      const totalCells = grid.children.length;
+      const needed = (7*6) - totalCells;
+      for (let i=1;i<=needed;i++){ const d=document.createElement('div'); d.className='cell muted disabled'; d.textContent=String(i); grid.appendChild(d); }
+      container.appendChild(grid);
+    }
+    function renderYears(container){
+      const wrap=document.createElement('div'); wrap.className='years';
+      const start=cur.getFullYear()-4;
+      for (let i=0;i<9;i++){
+        const y=start+i; const btn=document.createElement('div'); btn.className='year'; btn.textContent=y;
+        const earliest=new Date(y,0,1), latest=new Date(y,11,31);
+        const disabled=(latest<DOB_MIN) || (earliest>maxDOB);
+        if (disabled) btn.classList.add('disabled');
+        if (y===cur.getFullYear()) btn.classList.add('active');
+        if (!disabled) btn.onclick=()=>{ cur.setFullYear(y); view='day'; render(); };
+        wrap.appendChild(btn);
+      }
+      container.appendChild(wrap);
+    }
+    function render(){ pop.innerHTML=''; renderHeader(pop); if(view==='day') renderDays(pop); else renderYears(pop); }
+    function show(){ if(shown) return; shown=true; view='day'; render(); pop.style.display='block';
+      document.addEventListener('keydown', escClose, true);
+      document.addEventListener('mousedown', outsideClose, true);
+    }
+    function hide(){ shown=false; pop.style.display='none';
+      document.removeEventListener('keydown', escClose, true);
+      document.removeEventListener('mousedown', outsideClose, true);
+    }
+    function escClose(e){ if (e.key==='Escape') { hide(); } }
+    function outsideClose(e){ if (e.target===input || pop.contains(e.target)) return; hide(); }
+    input.addEventListener('click', show);
+    input.addEventListener('keydown', (e)=>{ if ((e.key==='Enter'||e.key===' ') && !shown){ e.preventDefault(); show(); } if (e.key==='Escape' && shown){ e.preventDefault(); } });
+    input.placeholder = toDisplay(maxDOB);
+  })();
+
+  // OPTIONAL: Places Autocomplete
+  if (window.google?.maps?.places) {
+    try {
+      const input = document.getElementById('address');
+      const ac = new google.maps.places.Autocomplete(input, { fields: ['formatted_address', 'geometry', 'name'], types: ['geocode'] });
+      ac.addListener('place_changed', ()=>{ const p = ac.getPlace(); if (p?.formatted_address) input.value = p.formatted_address; });
+    } catch(_) {}
+  }
+
+  /* ----- VALIDATION + SUBMIT ----- */
+  function clearErrors(){
+    document.querySelectorAll('.is-error').forEach(e=>e.classList.remove('is-error'));
+    $('#formWarn').classList.remove('show'); $('#formWarn').textContent='';
+  }
+  function requireVal(el, label, errors){
+    const v = (el.value||'').trim();
+    if (!v){ errors.push(label); el.classList.add('is-error'); }
+  }
+  function validate(){
+    clearErrors();
+    const errors = [];
+    requireVal($('#lastName'), 'Last Name', errors);
+    requireVal($('#firstName'), 'First Name', errors);
+    requireVal($('#citizenship'), 'Citizenship', errors);
+    requireVal($('#gender'), 'Gender', errors);
+    requireVal($('#dob'), 'Date of Birth', errors);
+
+    // visible education / experience / training rows rely on their own required inputs,
+    // but we’ll spot-check Work Experience date pairs if present.
+    for (const block of document.querySelectorAll('#experienceList .stack')){
+      const selects = block.querySelectorAll('select');
+      const sectorSel = selects[0], levelSel = selects[1];
+      if (sectorSel) requireVal(sectorSel, 'Work Experience: Industry', errors);
+      if (levelSel)  requireVal(levelSel,  'Work Experience: Job Level', errors);
+
+      const sm = selects[2], sy = selects[3], em = selects[4], ey = selects[5];
+      if (sm) requireVal(sm, 'Work Experience: Start Month', errors);
+      if (sy) requireVal(sy, 'Work Experience: Start Year', errors);
+      const current = block.querySelector('input[type="checkbox"]')?.checked || false;
+      if (!current){ if (em) requireVal(em, 'Work Experience: End Month', errors); if (ey) requireVal(ey, 'Work Experience: End Year', errors); }
+    }
+    if (errors.length){
+      const msg = `Please complete the following: ${errors.join(', ')}.`;
+      const box = $('#formWarn'); box.textContent = msg; box.classList.add('show');
+      const firstErr = document.querySelector('.is-error');
+      firstErr? firstErr.focus() : $('#panelTitle').scrollIntoView({block:'start', behavior:'smooth'});
+      return false;
+    }
+    return true;
+  }
+
+  document.getElementById('profileForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    const payload = {
+      name: {
+        last: $('#lastName').value.trim(),
+        first: $('#firstName').value.trim(),
+        middle: ($('#middleInitial').value.trim() || null)
+      },
+      gender: $('#gender').value,
+      dob: $('#dob').value,
+      address: $('#address').value.trim() || null,
+      citizenship: $('#citizenship').value,
+      education: [],
+      experience: [],
+      trainings: []
+    };
+
+    // collect education
+    for (const block of document.querySelectorAll('#educationList .stack')) {
+      const selects = block.querySelectorAll('select');
+      const program = selects[0]?.value || '';
+      const levelEl = selects[1];
+      const level   = levelEl?.value || '';
+      const mult    = parseFloat(levelEl?.selectedOptions?.[0]?.dataset?.mult || '0');
+      const univ    = selects[2]?.value || '';
+      const yearStart = selects[3]?.value || '';
+      const yearEnd   = selects[4]?.value || '';
+      const graduated = block.querySelector('input[type="checkbox"]')?.checked || false;
+
+      if (program && level && univ) {
+        payload.education.push({
+          program, level, university: univ, multiplier: mult,
+          yearStart: yearStart||null, yearEnd: yearEnd||null, graduated
+        });
+      }
+    }
+
+    // collect experience
+    for (const block of document.querySelectorAll('#experienceList .stack')) {
+      const selects = block.querySelectorAll('select');
+      const sectorSel = selects[0];
+      const levelSel  = selects[1];
+      const sm = selects[2]?.value || '';
+      const sy = selects[3]?.value || '';
+      const em = selects[4]?.value || '';
+      const ey = selects[5]?.value || '';
+      const current = block.querySelector('input[type="checkbox"]')?.checked || false;
+
+      const industry  = sectorSel?.value || '';
+      const code      = sectorSel?.selectedOptions?.[0]?.dataset?.code || '';
+      const careerLevel = levelSel?.value || '';
+      const mult      = parseFloat(levelSel?.selectedOptions?.[0]?.dataset?.mult || '0');
+      const years     = yearsFrom(sm, sy, em, ey, current);
+
+      if (industry && careerLevel && sm && sy && (current || (em && ey))) {
+        payload.experience.push({
+          industry, code, careerLevel,
+          startMonth: sm, startYear: sy,
+          endMonth: current?null:em, endYear: current?null:ey,
+          current,
+          years, multiplier: mult, computedLevel: +(years * mult).toFixed(2)
+        });
+      }
+    }
+
+    // collect trainings
+    for (const block of document.querySelectorAll('#trainingList .stack')) {
+      const selects = block.querySelectorAll('select');
+      const title = selects[0]?.value || '';
+      const org   = selects[1]?.value || '';
+      const dur   = parseInt(block.querySelector('input[type="number"]')?.value || '0', 10);
+      const unit  = selects[2]?.value || '';
+      if (title && org && !Number.isNaN(dur) && unit) {
+        payload.trainings.push({ title, organizer: org, durationValue: dur, durationUnit: unit });
+      }
+    }
+
+    // Save to localStorage
+    localStorage.setItem('venguild_complete_profile', JSON.stringify(payload));
+
+    // Redirect
+    window.location.href = "gateway.html";
+  });
+});
+</script>
+
+<!-- Optional Google Places: replace YOUR_KEY
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY&libraries=places" async defer></script>
+-->
+</body>
+</html>

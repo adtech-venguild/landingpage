@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Tight Lightning Cluster — Thin + Blue Edge</title>
+<style>
+  html,body{height:100%;margin:0;overflow:hidden}
+  body{
+    background:
+      linear-gradient(to bottom, rgba(6,12,18,.35), rgba(6,12,18,.55)),
+      url("assets/background/background2.png");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+  }
+  canvas{position:fixed;inset:0;width:100vw;height:100vh;display:block;pointer-events:none}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+
+<script>
+(() => {
+  const cvs = document.getElementById('fx');
+  const ctx = cvs.getContext('2d', {alpha:true});
+
+  // Offscreens for the “melt/refraction” look
+  const mask = document.createElement('canvas'); const mctx = mask.getContext('2d');
+  const offOrig = document.createElement('canvas'); const octx = offOrig.getContext('2d');
+  const offBlur = document.createElement('canvas'); const bctx = offBlur.getContext('2d');
+  const refr = document.createElement('canvas'); const rctx = refr.getContext('2d');
+
+  // Background image (same as page) for refraction
+  const bg = new Image();
+  bg.src = "assets/background/background2.png";
+
+  let DPR=1,W=0,H=0,CX=0,CY=0,drawBox=null,sources=[];
+
+  function sizeToCover(iw, ih, bw, bh){
+    const s=Math.max(bw/iw, bh/ih);
+    const w=iw*s,h=ih*s;
+    return {x:(bw-w)/2,y:(bh-h)/2,w,h};
+  }
+
+  function resize(){
+    DPR = Math.min(2, window.devicePixelRatio||1);
+    W = Math.floor(innerWidth*DPR);
+    H = Math.floor(innerHeight*DPR);
+    [cvs,mask,offOrig,offBlur,refr].forEach(c=>{ c.width=W; c.height=H; });
+    cvs.style.width=innerWidth+'px'; cvs.style.height=innerHeight+'px';
+    CX=W/2; CY=H*0.30;
+
+    // 3x3 cluster near the center with tiny gaps
+    const gap = Math.max(10*DPR, Math.min(W,H)*0.02);
+    sources = [];
+    for(let dy=-1; dy<=1; dy++){
+      for(let dx=-1; dx<=1; dx++){
+        sources.push({x:CX+dx*gap, y:CY+dy*gap});
+      }
+    }
+
+    if (bg.complete && bg.naturalWidth) rasterizeBackground();
+  }
+  addEventListener('resize', resize, {passive:true});
+
+  function rasterizeBackground(){
+    drawBox = sizeToCover(bg.naturalWidth,bg.naturalHeight,W,H);
+    octx.clearRect(0,0,W,H);
+    octx.drawImage(bg, drawBox.x,drawBox.y,drawBox.w,drawBox.h);
+
+    // Softened copy used for the “melt” area
+    bctx.clearRect(0,0,W,H);
+    bctx.filter = `blur(${5*DPR}px) saturate(1.06) brightness(1.04)`;
+    bctx.drawImage(bg, drawBox.x,drawBox.y,drawBox.w,drawBox.h);
+    bctx.filter = 'none';
+  }
+  bg.onload = ()=>{ resize(); rasterizeBackground(); };
+  resize();
+
+  /* -------- Thin, messy, short lightning -------- */
+  class Bolt {
+    constructor(src){
+      this.birth=performance.now();
+      this.life = 100 + Math.random()*140; // quick, snappy
+      this.base = (0.8 + Math.random()*0.5) * DPR; // very thin
+      this.points=this.#makePath(src);
+    }
+    #makePath(src){
+      const arr=[{x:src.x,y:src.y}];
+
+      // small reach (shorter than previous)
+      const baseLen=Math.min(W,H)*(0.07 + Math.random()*0.08);
+      const segs = Math.max(13, Math.floor(baseLen/9)); // lots of segments so it looks "messy"
+      let a=Math.random()*Math.PI*2, x=src.x, y=src.y;
+
+      for(let i=0;i<segs;i++){
+        const step=baseLen/segs;
+        // Higher angular noise to look erratic
+        a += (Math.random()-0.5)*1.1;
+        x += Math.cos(a)*step + (Math.random()-0.5)*5*DPR;
+        y += Math.sin(a)*step + (Math.random()-0.5)*5*DPR;
+        arr.push({x,y});
+      }
+
+      // tiny branches (short & spiky)
+      if(Math.random()<0.75){
+        const k=2+Math.floor(Math.random()*3);
+        for(let i=0;i<k;i++){
+          const idx=2+Math.floor(Math.random()*(arr.length-4));
+          const p=arr[idx];
+          arr.push(...this.#branch(p, a + ((Math.random()<0.5?-1:1)*(1.0+Math.random())), baseLen*0.25));
+        }
+      }
+      return arr;
+    }
+    #branch(start, ang, len){
+      const out=[start]; let x=start.x,y=start.y,a=ang;
+      const segs=Math.max(4,Math.floor(len/10));
+      for(let i=0;i<segs;i++){
+        const step=len/segs;
+        a += (Math.random()-0.5)*1.0;
+        x += Math.cos(a)*step + (Math.random()-0.5)*3*DPR;
+        y += Math.sin(a)*step + (Math.random()-0.5)*3*DPR;
+        out.push({x,y});
+      }
+      return out;
+    }
+    alive(t){ return (t-this.birth) < this.life; }
+    alpha(t){
+      const p=(t-this.birth)/this.life;
+      return p<0.25 ? (p/0.25) : (1-(p-0.25)/0.75);
+    }
+    drawMask(t, ctx){
+      const a=this.alpha(t); if(a<=0) return;
+      ctx.save();
+      ctx.globalCompositeOperation='lighter';
+      ctx.lineCap='round'; ctx.lineJoin='round';
+
+      // smaller melt area to match the tiny strikes
+      ctx.shadowBlur=6*DPR; ctx.shadowColor='rgba(255,255,255,1)';
+      ctx.strokeStyle=`rgba(255,255,255,${0.65*a})`;
+      ctx.lineWidth=this.base*3.2;
+      ctx.beginPath(); ctx.moveTo(this.points[0].x,this.points[0].y);
+      for(let i=1;i<this.points.length;i++) ctx.lineTo(this.points[i].x,this.points[i].y);
+      ctx.stroke();
+
+      ctx.shadowBlur=3*DPR;
+      ctx.strokeStyle=`rgba(255,255,255,${a})`;
+      ctx.lineWidth=this.base*1.2;
+      ctx.beginPath(); ctx.moveTo(this.points[0].x,this.points[0].y);
+      for(let i=1;i<this.points.length;i++) ctx.lineTo(this.points[i].x,this.points[i].y);
+      ctx.stroke();
+      ctx.restore();
+    }
+    drawThinOverlay(t, ctx){
+      const a=this.alpha(t); if(a<=0) return;
+      ctx.save();
+      ctx.lineCap='round'; ctx.lineJoin='round';
+
+      // Blue edge/border (slightly thicker path behind)
+      ctx.globalCompositeOperation='screen';
+      ctx.strokeStyle=`rgba(110,200,255,${0.9*a})`;
+      ctx.shadowBlur=10*DPR; ctx.shadowColor='rgba(110,200,255,.9)';
+      ctx.lineWidth=Math.max(1, this.base*1.4);
+      ctx.beginPath(); ctx.moveTo(this.points[0].x,this.points[0].y);
+      for(let i=1;i<this.points.length;i++) ctx.lineTo(this.points[i].x,this.points[i].y);
+      ctx.stroke();
+
+      // Ultra-thin white core
+      ctx.strokeStyle=`rgba(255,255,255,${0.98*a})`;
+      ctx.shadowBlur=6*DPR; ctx.shadowColor='rgba(255,255,255,.9)';
+      ctx.lineWidth=Math.max(0.6, this.base*0.55);
+      ctx.beginPath(); ctx.moveTo(this.points[0].x,this.points[0].y);
+      for(let i=1;i<this.points.length;i++) ctx.lineTo(this.points[i].x,this.points[i].y);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  const bolts=[]; 
+  let nextSpawn=0, burstUntil=0;
+
+  function spawnBolts(t){
+    // Random short bursts (“blitzkrieg”) with small reach
+    if (t > nextSpawn){
+      // chance to enter/extend a burst
+      if (Math.random() < 0.12) burstUntil = t + 220 + Math.random()*220;
+
+      const inBurst = t < burstUntil;
+      const delay = inBurst ? (22 + Math.random()*26) : (70 + Math.random()*90);
+      nextSpawn = t + delay;
+
+      const count = inBurst ? (2 + (Math.random()*3|0)) : (1 + (Math.random()*2|0));
+      for(let i=0;i<count;i++){
+        const src = sources[(Math.random()*sources.length)|0];
+        bolts.push(new Bolt(src));
+      }
+    }
+  }
+
+  function drawSources(){
+    // Tiny flicker at cluster (very subtle)
+    ctx.save();
+    ctx.globalCompositeOperation='screen';
+    for(const s of sources){
+      const A = 0.05 + Math.random()*0.05;
+      const R = 7*DPR + Math.random()*4*DPR;
+      const g = ctx.createRadialGradient(s.x,s.y,0, s.x,s.y,R);
+      g.addColorStop(0, `rgba(160,220,255,${A})`);
+      g.addColorStop(1, 'rgba(160,220,255,0)');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(s.x,s.y,R,0,Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawFrame(t){
+    spawnBolts(t);
+
+    // 1) Build mask from current small bolts
+    mctx.clearRect(0,0,W,H);
+    for(let i=bolts.length-1;i>=0;i--){
+      if(!bolts[i].alive(t)) bolts.splice(i,1);
+      else bolts[i].drawMask(t, mctx);
+    }
+
+    // 2) Blur “melt” within mask
+    ctx.clearRect(0,0,W,H);
+    ctx.globalCompositeOperation='source-over';
+    ctx.drawImage(offBlur,0,0);
+    ctx.globalCompositeOperation='destination-in';
+    ctx.drawImage(mask,0,0);
+    ctx.globalCompositeOperation='source-over';
+
+    // 3) Slight refraction (shifted original through the mask)
+    rctx.clearRect(0,0,W,H);
+    const shiftX = Math.sin(t*0.012)*1.4*DPR;
+    const shiftY = Math.cos(t*0.01)*0.6*DPR;
+    rctx.drawImage(offOrig, shiftX, shiftY);
+    rctx.globalCompositeOperation='destination-in';
+    rctx.drawImage(mask,0,0);
+    rctx.globalCompositeOperation='source-over';
+    ctx.globalAlpha=0.4;
+    ctx.drawImage(refr,0,0);
+    ctx.globalAlpha=1;
+
+    // 4) Thin white + blue-edged lightning on top
+    for(const b of bolts) b.drawThinOverlay(t, ctx);
+
+    // 5) Subtle cluster glows
+    drawSources();
+
+    requestAnimationFrame(drawFrame);
+  }
+  requestAnimationFrame(drawFrame);
+})();
+</script>
+</body>
+</html>

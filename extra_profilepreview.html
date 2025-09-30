@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VENGUILD – Profile Preview</title>
+
+<!-- NOTE: For real social previews, serve per-user OG tags server-side. These static tags are just a generic fallback. -->
+<meta property="og:title" content="VENGUILD – Profile Preview">
+<meta property="og:description" content="See your archetype, level, rank, and elemental affinity.">
+<meta property="og:image" content="https://yourdomain.com/assets/share/default-share.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c1116; --card:#0f141a; --line:rgba(255,255,255,.10);
+    --text:#e9ecf1; --muted:#a9b4c1; --gold:#ffdf9e; --accent:#37e07d;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%; margin:0}
+  body{
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    background: var(--bg); color: var(--text);
+    min-height: 100dvh; display:grid; place-items:center; padding:14px;
+    background-image: linear-gradient(to bottom, rgba(6,12,18,.55), rgba(6,12,18,.6)), url("assets/background/background1.png");
+    background-size:cover; background-position:center; background-attachment: fixed; /* static */
+  }
+
+  .wrap{
+    width:min(1100px,96vw);
+    display:grid; gap:22px;
+    grid-template-columns: 0.95fr 1.3fr;
+    position:relative; z-index:1;
+  }
+  @media (max-width: 1080px){ .wrap{ grid-template-columns:1fr } }
+
+  /* LEFT: mockups */
+  .gallery{
+    position:relative; min-height: clamp(420px, 58vh, 720px);
+  }
+  .img{
+    position:absolute; bottom:0;
+    height:100%; width:auto; object-fit:contain;
+    image-rendering:auto; -webkit-user-drag:none; user-select:none;
+    filter: drop-shadow(0 14px 28px rgba(0,0,0,.55));
+    opacity:0; transform:translate(-50%,6px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .img.loaded{ opacity:1; transform:translate(-50%,0); }
+  .hero{ left: calc(45% - 60px); z-index:6; }
+  .pro  { left: calc(55% + 60px); z-index:7; }
+  @media (min-width: 1200px){
+    .hero{ left: calc(50% - 140px); }
+    .pro  { left: calc(50% + 140px); }
+  }
+  .assetError{
+    position:absolute; left:50%; transform:translateX(-50%); bottom:64px;
+    background:#1e2a3b; color:#ffd7d7; border:1px solid #6b2b2b;
+    padding:10px 12px; border-radius:12px; font-size:13px; display:none;
+    max-width:92%; z-index:9; text-align:center;
+  }
+
+  /* RIGHT: text card */
+  .pane{ position:relative; z-index:5; }
+  .pane::before{
+    content:"";
+    position:absolute; inset:-26px; border-radius:24px;
+    background:
+      radial-gradient(120% 80% at 80% 40%, rgba(111,227,255,.10), transparent 60%),
+      radial-gradient(90% 70%  at 20% 70%, rgba(55,224,125,.10),  transparent 65%),
+      rgba(10,16,23,.55);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.08),
+      0 20px 80px rgba(0,0,0,.55),
+      inset 0 0 200px rgba(55,224,125,.10),
+      inset 0 0 140px rgba(111,227,255,.08);
+    backdrop-filter: blur(6px);
+    pointer-events:none;
+  }
+  .inner{ padding:16px 16px 18px; position:relative; }
+
+  h1{
+    font-family:Cinzel,serif; margin:2px 2px 8px;
+    font-size: clamp(28px, 4.2vw, 46px);
+    color: var(--gold); line-height:1.15;
+  }
+  .lead{ font-size: clamp(16px, 2.5vw, 18px); color:#cfe3ff; margin:10px 2px 14px; }
+  .desc{
+    background:#0b1015; border:1px solid #1b2738; border-radius:14px;
+    padding:16px; line-height:1.7; margin:8px 2px 0;
+  }
+  .chips{display:flex; flex-wrap:wrap; gap:10px; margin:8px 2px 6px}
+  .chip{ padding:8px 12px; border-radius:999px; border:1px solid #1b2738; background:#0b1015; font-weight:700; color:#cfe6ff; letter-spacing:.02em;}
+  .pill{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 12px; border-radius:999px; font-weight:800;
+    color:#0c1116; background:linear-gradient(135deg, var(--accent), #2cd18c, #1aa37c);
+  }
+  .muted{ color:#a9b4c1 }
+
+  .ctaRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px }
+  .btn{ display:inline-block; text-decoration:none; font-weight:800; border-radius:12px; padding:12px 16px; }
+  .btn.primary{ background:linear-gradient(135deg, #ffe27a, #ffb800); color:#2a1a00; border:1px solid rgba(255,244,198,.65); }
+  .btn.ghost{ background:transparent; border:1px dashed #2a3a55; color:#9fd2ff; }
+
+  /* tiny orb dots for affinity codes */
+  .orbs{ display:flex; gap:8px; margin-left:6px }
+  .orb{ --c:#fff; width:16px; height:16px; border-radius:50%;
+        background: radial-gradient(circle at 32% 28%, transparent 0 38%, rgba(0,0,0,.55) 100%),
+                    radial-gradient(circle at 70% 70%, color-mix(in srgb, var(--c) 70%, transparent), transparent 60%);
+        border:1px solid color-mix(in srgb, var(--c) 60%, transparent 40%);
+        box-shadow:0 0 10px color-mix(in srgb, var(--c) 50%, transparent); }
+
+  /* fallback box when no data is saved */
+  .empty{
+    grid-column:1 / -1;
+    border:1px dashed #2a3a55; border-radius:14px; padding:16px;
+    background:rgba(9,14,22,.65); color:#cfe3ff;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap" id="wrap">
+  <!-- LEFT: mockups -->
+  <div class="gallery">
+    <img id="imgPro"  class="img pro"  alt="Professional">
+    <img id="imgHero" class="img hero" alt="Adventurer">
+    <div id="assetError" class="assetError"></div>
+  </div>
+
+  <!-- RIGHT: info -->
+  <section class="pane">
+    <div class="inner">
+      <h1 id="titleLine">Your VENGUILD Profile</h1>
+      <p class="lead" id="lead">Loading your destiny…</p>
+
+      <div class="chips">
+        <div class="chip">Level: <span id="lvl" style="margin-left:6px;font-weight:900">—</span></div>
+        <div class="chip">Rank: <span id="rankBox">—</span></div>
+        <div class="chip">Elemental Affinity: <span id="elemName" style="margin-left:6px">—</span>
+          <span id="orbs" class="orbs"></span>
+        </div>
+      </div>
+
+      <div class="desc" id="explain">
+        <!-- filled by JS -->
+      </div>
+
+      <div class="ctaRow">
+        <a class="btn primary" href="zone.html">Join the Guild</a>
+        <a class="btn ghost" id="copyBtn" href="#">Copy this preview link</a>
+      </div>
+      <p class="muted" style="margin:8px 2px 0">Tip: Share this with friends and compare archetypes, levels, and recommended jobs.</p>
+    </div>
+  </section>
+
+  <div id="empty" class="empty" style="display:none">
+    We couldn’t find a saved profile on this browser. Complete your details and test first,
+    then come back to preview your share card.
+    <div class="ctaRow" style="margin-top:10px">
+      <a class="btn primary" href="signup.html">Complete your profile</a>
+      <a class="btn ghost" href="personality.html">Take the Aptitude Exam</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* tiny helpers */
+const $ = s => document.querySelector(s);
+const safe = x => (x==null ? '' : String(x));
+
+const ORB_COLOR = {'1':'#5b3a1e','2':'#ff6a6a','3':'#4da3ff','4':'#7ef2b0','5':'#37e07d'};
+
+/* load saved summaries from prior steps */
+(function init(){
+  const profile = JSON.parse(localStorage.getItem('venguild_profile')||'null');
+  const personality = JSON.parse(localStorage.getItem('venguild_personality')||'null');
+
+  if(!profile){ // no data saved at all
+    $('#empty').style.display='block';
+    $('#lead').textContent = '—';
+    return;
+  }
+
+  /* HEADLINE */
+  const name = safe(profile?.name?.full || profile?.name?.first || 'Adventurer');
+  const lvl  = Number(profile?.totals?.total || 0);
+  const rank = safe(profile?.recommendation?.rank || '—');
+  const affinityLabel = safe(profile?.elementalAffinity?.label || '—');
+  const elemCodes = String(profile?.elementalAffinity?.codes || '');
+  const jobClass = safe(personality?.job?.jobClass || profile?.mappedJob?.jobClass || '');
+
+  $('#titleLine').textContent = `You are an ${name}!`;
+  $('#lead').innerHTML = [
+    `You are <strong>Level ${lvl}</strong> in real life and your Guild Rank is <strong>${rank}</strong>.`,
+    `Your elemental affinity is <strong>${affinityLabel}</strong>.`,
+    `Match with your friends and see what their recommended job and level are!`
+  ].join(' ');
+
+  $('#lvl').textContent = lvl;
+  $('#rankBox').textContent = rank;
+  $('#elemName').textContent = affinityLabel;
+
+  /* ORB DOTS */
+  const orbs = $('#orbs'); orbs.innerHTML = '';
+  elemCodes.split('').forEach(d=>{
+    if(!ORB_COLOR[d]) return;
+    const o=document.createElement('span'); o.className='orb'; o.style.setProperty('--c', ORB_COLOR[d]); orbs.appendChild(o);
+  });
+
+  /* EXPLANATION BLOCK */
+  const explain = $('#explain');
+  const creepExplain = `<strong>Primordial Slime mode!</strong> Your answers or mapping didn’t yield a clear archetype yet. That’s not failure—it’s untapped potential. Retake the quick test or add more experience/education to crystallize your class.`;
+  const normalExplain = [
+    jobClass ? `Recommended job class: <strong>${jobClass}</strong>.` : ``,
+    `This preview shows both your <em>Adventurer</em> art (left) and your <em>Professional</em> path (right).`,
+    `If an image can’t be found, we fall back to <code>creep.png</code> and show this note.`
+  ].join(' ');
+  explain.innerHTML = normalExplain;
+
+  /* ASSET LOADING (hero from Final Code; professional from top experience) */
+  const hero = $('#imgHero');
+  const pro  = $('#imgPro');
+  const aerr = $('#assetError');
+
+  function setLoaded(img){ img.onload = ()=> img.classList.add('loaded'); }
+  function setHero(path){
+    setLoaded(hero);
+    hero.onerror = ()=>{
+      hero.src = 'assets/default/creep.png';
+      aerr.textContent = `Could not load hero asset. Using fallback: creep.png (tried: ${path})`;
+      aerr.style.display = 'block';
+      explain.innerHTML = creepExplain;
+    };
+    hero.src = path;
+  }
+
+  // HERO: choose final code from personality mapping → gender
+  const gCode = (profile?.assets?.genderCode || '').toLowerCase().includes('m') ? 'm' : 'f';
+  const finalCode = safe(personality?._backend?.finalCode || profile?.mappedJob?.finalCode || '').replace(/^@/,'').toLowerCase();
+  if(finalCode){
+    const heroPath = `assets/adventurers/${finalCode}_${gCode}.png`;
+    setHero(heroPath);
+  }else{
+    // no mapping → creep
+    setLoaded(hero);
+    hero.src = 'assets/default/creep.png';
+    explain.innerHTML = creepExplain;
+  }
+
+  // PROFESSIONAL: code + gender + region
+  const region = (profile?.assets?.regionCode || '').replace(/^_/,'');
+  const topCode = safe(profile?.raw?.sectorTopCode || '');
+  if(topCode && gCode && region){
+    setLoaded(pro);
+    pro.onerror = ()=> pro.style.display='none';
+    pro.src = `assets/professional/${topCode}_${gCode}_${region}.png`;
+  }else{
+    pro.style.display='none';
+  }
+
+  /* Copy link */
+  $('#copyBtn').addEventListener('click', (e)=>{
+    e.preventDefault();
+    const url = location.href;
+    navigator.clipboard?.writeText(url).then(()=>{
+      $('#copyBtn').textContent = 'Link copied!';
+      setTimeout(()=> $('#copyBtn').textContent='Copy this preview link', 1200);
+    });
+  });
+})();
+</script>
+</body>
+</html>

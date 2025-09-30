@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VENGUILD – Archetype Reveal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c1116; --card:#0f141a; --line:rgba(255,255,255,.08);
+    --text:#e9ecf1; --muted:#a9b4c1; --gold:#ffdf9e; --accent:#37e07d;
+
+    /* Positioning targets */
+    --hero-left-mobile: 40%;
+    --pro-left-mobile: 60%;
+    --hero-left-wide: -45%;
+    --pro-left-wide:  -12%;
+
+    /* Safe-area for iPhone notches/home bar */
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --safe-t: env(safe-area-inset-top, 0px);
+    --safe-l: env(safe-area-inset-left, 0px);
+    --safe-r: env(safe-area-inset-right, 0px);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%; margin:0}
+
+  /* Only vertical scroll, hide bars */
+  html, body{
+    overflow-x:hidden;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  body::-webkit-scrollbar{width:0;height:0}
+
+  body{
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    background: var(--bg); color: var(--text);
+    min-height: 100svh;                 /* stable mobile height */
+    display:grid; place-items:center;
+    padding: max(10px, 14px);
+    padding-left: calc(max(10px, 14px) + var(--safe-l));
+    padding-right: calc(max(10px, 14px) + var(--safe-r));
+    padding-top: max(10px, 14px, var(--safe-t));
+    background-image: linear-gradient(to bottom, rgba(6,12,18,.55), rgba(6,12,18,.6)), url("assets/background/background1.png");
+    background-size:cover; background-position:center;
+  }
+
+  /* ===== Swirling background (fixed, behind content) ===== */
+  .scene{ position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+  .stars{
+    position:absolute; inset:-12%;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,.25) 0 1px, transparent 2px) 0 0/180px 180px,
+      radial-gradient(circle at 70% 60%, rgba(255,255,255,.18) 0 1px, transparent 2px) 0 0/220px 220px,
+      radial-gradient(circle at 50% 50%, rgba(255,255,255,.10) 0 1px, transparent 2px) 0 0/260px 260px;
+    opacity:.28; filter: blur(.2px);
+    animation: star-drift 60s linear infinite;
+  }
+  @keyframes star-drift{ to{ transform: rotate(360deg) } }
+
+  .swirl{
+    position:absolute; left:50%; top:50%;
+    width:max(120vmax,120vw); height:max(120vmax,120vh);
+    transform:translate(-50%,-50%);
+    filter: drop-shadow(0 10px 22px rgba(0,0,0,.45));
+    opacity:.85;
+  }
+  .ring{
+    position:absolute; inset:0; border-radius:50%;
+    background:
+      conic-gradient(from 0deg,
+        transparent 0 58%,
+        rgba(60,170,160,.18) 63%,
+        rgba(130,230,210,.20) 67%,
+        transparent 73%);
+    -webkit-mask:
+      radial-gradient(circle, transparent 60%, black 63%, black 68%, transparent 71%);
+            mask:
+      radial-gradient(circle, transparent 60%, black 63%, black 68%, transparent 71%);
+    animation: swirl-spin 40s linear infinite;
+  }
+  @keyframes swirl-spin{ to{ transform: rotate(360deg) } }
+
+  .r1{ animation-duration: 38s; transform: scale(0.86); }
+  .r2{ animation-duration: 46s; transform: scale(1.00); }
+  .r3{ animation-duration: 56s; transform: scale(1.18); }
+  .r4{ animation-duration: 70s; transform: scale(1.36); }
+  .r5{ animation-duration: 90s; transform: scale(1.58); }
+
+  .texture{
+    position:absolute; inset:-18%;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(30,140,130,.20), transparent 60%),
+      repeating-radial-gradient(circle at 50% 60%, rgba(255,255,255,.035) 0 2px, transparent 2px 6px);
+    mix-blend-mode: screen; opacity:.55;
+    animation: slow-rotate 120s linear infinite;
+  }
+  .core{
+    position:absolute; left:50%; top:50%;
+    width:38vmin; height:38vmin; transform:translate(-50%,-50%); border-radius:50%;
+    background: radial-gradient(circle at 50% 52%, rgba(140,255,230,.26) 0 55%, rgba(20,120,110,.12) 60%, transparent 70%);
+    filter: blur(10px) saturate(1.05); opacity:.70;
+    animation: core-pulse 7s ease-in-out infinite;
+  }
+  @keyframes slow-rotate{ to{ transform: rotate(360deg) } }
+  @keyframes core-pulse{ 0%,100%{ transform:translate(-50%,-50%) scale(1) } 50%{ transform:translate(-50%,-50%) scale(1.06) } }
+
+  /* Stage layout */
+  .wrap{
+    width:min(1200px,100%);
+    display:grid; gap:22px;
+    grid-template-columns: 0.95fr 1.3fr;
+    animation:fade .45s ease;
+    border:none; box-shadow:none; background:transparent; padding:0;
+    position:relative; z-index:1;
+  }
+  @keyframes fade{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+
+  /* LEFT: shadow + pro */
+  .gallery{
+    position:relative;
+    min-height:920px;
+    overflow:visible;
+    /* reserve space for the bottom CTA so it never overlaps/cuts */
+    padding-bottom: calc(90px + var(--safe-b));
+  }
+  .img{
+    position:absolute; bottom:0; height:100%; width:auto; object-fit:contain;
+    -webkit-user-drag:none; user-select:none;
+    filter: drop-shadow(0 14px 28px rgba(0,0,0,.55));
+    opacity:0; transform:translate(-50%,6px);
+    transition:opacity .6s ease, transform .6s ease;
+    pointer-events:none;
+  }
+  .img.loaded{ opacity:1; transform:translate(-50%,0); }
+
+  .shadow{ left: var(--hero-left-mobile); z-index:6; }
+  .pro   { left: var(--pro-left-mobile);  z-index:7; }
+
+  .shadow-shine{
+    position:absolute; bottom:0; height:100%;
+    left: var(--hero-left-mobile);
+    transform: translate(-50%,0);
+    pointer-events:none;
+    z-index:6;
+    mix-blend-mode: screen;
+  }
+
+  /* Foot CTA centered under the feet (stays inside safe-area) */
+  .foot-cta{
+    position:absolute;
+    left:50%; transform:translateX(-50%);
+    bottom: calc(10px + var(--safe-b));
+    z-index:15;
+    display:flex; justify-content:center;
+    padding: 0 12px;
+    width: max-content;
+    max-width: calc(100% - 24px - var(--safe-l) - var(--safe-r));
+  }
+
+  @media (min-width:1200px){
+    .shadow{ left: var(--hero-left-wide); transform:translate(0,0); }
+    .shadow.loaded{ transform:none; }
+    .pro{ left: var(--pro-left-wide); transform:translate(0,0); }
+    .pro.loaded{ transform:none; }
+    .shadow-shine{ left: var(--hero-left-wide); transform:none; }
+  }
+
+  /* RIGHT content */
+  .pane{ position:relative; z-index:5; }
+  .pane::before{
+    content:"";
+    position:absolute; inset:-26px; border-radius:24px;
+    background:
+      radial-gradient(120% 80% at 80% 40%, rgba(111,227,255,.10), transparent 60%),
+      radial-gradient(90% 70%  at 20% 70%, rgba(55,224,125,.10),  transparent 65%),
+      rgba(10,16,23,.55);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.08),
+      0 20px 80px rgba(0,0,0,.55),
+      inset 0 0 200px rgba(55,224,125,.10),
+      inset 0 0 140px rgba(111,227,255,.08);
+    backdrop-filter: blur(6px);
+    pointer-events:none;
+  }
+  .inner{ padding:12px 14px; position:relative; }
+
+  h1{
+    font-family:Cinzel,serif; margin:2px 2px 8px;
+    font-size: clamp(24px, 6vw, 46px);     /* clamp for small phones */
+    color: var(--gold); line-height:1.15;
+  }
+  .muted{color:var(--muted)}
+  .chipsRow{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:8px 2px 6px}
+  .chip{
+    padding:8px 12px; border-radius:999px; border:1px solid #1b2738; background:#0b1015;
+    font-weight:700; color:#cfe6ff; letter-spacing:.02em;
+  }
+  .rank{
+    width:auto; min-width:44px; height:44px; padding:0 12px; display:grid; place-items:center;
+    border-radius:10px; border:1px solid #5f80ae; background:#0b1015; color:#cfe6ff;
+    font-weight:900; font-size:20px;
+  }
+  .pill{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 12px; border-radius:999px; font-weight:800;
+    color:#0c1116; background:linear-gradient(135deg, var(--accent), #2cd18c, #1aa37c);
+  }
+  .sectionTitle{font-weight:900; letter-spacing:.05em; margin:12px 2px 6px; color:#cfe3ff; text-transform:uppercase; font-size:13px}
+  .desc{
+    background:#0b1015; border:1px solid #1b2738; border-radius:14px;
+    padding:16px; line-height:1.7; margin:8px 2px 0;
+    opacity:0; transform:translateY(6px); animation:fadeInUp .45s ease .08s forwards
+  }
+  @keyframes fadeInUp{ to{opacity:1; transform:none} }
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin:0 2px 8px}
+  .chip.active{
+    color:#0c1116; border-color:transparent;
+    background:linear-gradient(135deg, #ffe27a, #ffd35a, #ffb800);
+    box-shadow:0 0 12px rgba(255,216,112,.45), inset 0 0 8px rgba(255,255,255,.25);
+  }
+  .ranks{display:flex; gap:8px; flex-wrap:wrap; margin:0 2px}
+  .rank.active{
+    color:#0c1116; background:linear-gradient(135deg,#a0f2ff,#6fe3ff);
+    box-shadow:0 0 16px rgba(160,242,255,.5), inset 0 0 10px rgba(255,255,255,.25);
+  }
+
+  /* ======= ORBIT ORBS ======= */
+  .eaWrap{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:6px 2px 0 2px; position:relative; z-index:20; }
+  .eaLabel{ font-weight:800; color:#cfe3ff; letter-spacing:.04em; text-transform:uppercase; font-size:12px; }
+  .orbDock{ --R:22px; --speed:22s; position: relative; width: calc(var(--R) * 2); height: calc(var(--R) * 2); pointer-events:none; filter: drop-shadow(0 6px 14px rgba(0,0,0,.45)); z-index:50; }
+  .orb-track{ position:absolute; inset:0; border-radius:50%; animation:orb-ccw var(--speed) linear infinite; z-index:50; }
+  @keyframes orb-ccw{ to{ transform:rotate(-360deg);} }
+  .orb-wrap{ position:absolute; top:50%; left:50%; transform: rotate(var(--phase)) translateX(var(--R)) translate(-50%,-50%); z-index:50; }
+  .orb{ --size:26; --c:#fff; position:absolute; top:50%; left:50%; width:calc(var(--size)*1px); height:calc(var(--size)*1px); transform:translate(-50%,-50%); border-radius:50%;
+        background: radial-gradient(circle at 32% 28%, transparent 0 38%, rgba(0,0,0,.55) 100%), radial-gradient(circle at 70% 70%, color-mix(in srgb, var(--c) 70%, transparent), transparent 60%);
+        border:1px solid color-mix(in srgb, var(--c) 60%, transparent 40%); box-shadow:0 0 10px var(--c), 0 0 26px var(--c), 0 0 60px color-mix(in srgb, var(--c) 55%, transparent); z-index:50; }
+  .orb::before{ content:""; position:absolute; inset:-14px; border-radius:50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--c) 25%, transparent), transparent 70%); filter:blur(10px); animation:orb-pulse 3.6s ease-in-out infinite; }
+  @keyframes orb-pulse{ 0%,100%{opacity:.45; transform:scale(1)} 50%{opacity:.8; transform:scale(1.08)} }
+  .sparks{ position:absolute; top:50%; left:50%; width:0; height:0; z-index:50; }
+  .spark{
+    --col:#fff; --ang:0deg; --dist:18; --ssize:4; --dur:6s; --delay:0s;
+    position:absolute; top:0; left:0; width:calc(var(--ssize)*1px); height:calc(var(--ssize)*1px);
+    border-radius:50%;
+    background: radial-gradient(circle at 40% 40%, #fff 0 40%, var(--col) 55%, transparent 75%);
+    box-shadow:0 0 6px var(--col), 0 0 16px color-mix(in srgb, var(--col) 85%, transparent);
+    transform:translate(-50%,-50%) rotate(var(--ang)) translateX(calc(var(--dist)*1px));
+    animation:spark-swirl var(--dur) linear infinite, spark-twinkle calc(var(--dur)*.8) ease-in-out infinite;
+    animation-delay:var(--delay);
+  }
+  @keyframes spark-swirl{ to{ transform:translate(-50%,-50%) rotate(calc(var(--ang) + 360deg)) translateX(calc(var(--dist)*1px)); } }
+  @keyframes spark-twinkle{ 0%,100%{opacity:.2; filter:blur(.5px)} 15%{opacity:.9; filter:blur(.2px)} 55%{opacity:.35; filter:blur(.9px)} }
+
+  /* GLINT bits */
+  .glint-wrap{ position:absolute; inset:-15%; transform:rotate(var(--ang, 0deg)); overflow:hidden; }
+  .glint-bar{
+    position:absolute; top:0; bottom:0; left:-40%; width:30%;
+    background: linear-gradient(to right, rgba(135,180,255,0) 0%, rgba(170,220,255,.45) 40%, rgba(255,255,255,.95) 50%, rgba(170,220,255,.45) 60%, rgba(135,180,255,0) 100%);
+    filter: blur(8px) drop-shadow(0 0 6px rgba(170,220,255,.55)) drop-shadow(0 0 16px rgba(155,210,255,.35));
+    animation: glint-move 1.35s ease-in-out forwards; opacity:.85;
+  }
+  @keyframes glint-move{ to{ transform:translateX(220%); opacity:0; } }
+
+  /* CTA styles */
+  .cta{
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    padding:16px 26px;
+    border-radius:999px;
+    font-weight:900; letter-spacing:.04em; text-transform:uppercase;
+    font-size: clamp(14px, 3.8vw, 20px);
+    color:#2a1a00; text-decoration:none; cursor:pointer;
+    background:linear-gradient(135deg,#ffe27a,#ffd35a,#ffb800);
+    border:1px solid rgba(255,244,198,.65);
+    box-shadow:0 12px 22px rgba(0,0,0,.45), 0 0 20px rgba(255,216,112,.55), inset 0 0 10px rgba(255,255,255,.28);
+    transition:transform .15s ease, box-shadow .2s ease, filter .2s ease;
+    white-space: normal;            /* allow wrap on very narrow phones */
+    text-align:center;
+  }
+  .cta:hover{
+    transform:translateY(-2px) scale(1.03);
+    box-shadow:0 16px 28px rgba(0,0,0,.55), 0 0 28px rgba(255,216,112,.75), inset 0 0 12px rgba(255,255,255,.35);
+    filter:saturate(1.08);
+  }
+  .cta.xl{ padding:18px 30px; font-size: clamp(16px, 4.2vw, 22px); }
+
+  /* Recommended Adventurer reveal card */
+  .revealCard{
+    margin:14px 2px 0;
+    background:#0b1015;
+    border:1px solid #1b2738;
+    border-radius:14px;
+    padding:16px;
+  }
+  .revealTop{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  .revealTitle{
+    font-family:Cinzel,serif;
+    font-size: clamp(20px, 5.2vw, 34px);
+    color:#e9ecf1; margin:0;
+  }
+  .hint{ font-size:12px; color:#a9b4c1; margin-top:8px }
+  .label{ font-weight:800; color:#cfe3ff; letter-spacing:.05em; text-transform:uppercase; font-size:12px; margin-bottom:8px}
+
+  /* Phone tightening */
+  @media (max-width:1080px){
+    .wrap{ grid-template-columns:1fr }
+    .gallery{ min-height:640px }
+  }
+  @media (max-width:390px){
+    .wrap { gap: 16px; }
+    .inner { padding: 10px 12px; }
+    .pane::before { inset: -18px; border-radius: 18px; }
+    .chips, .ranks { gap: 6px; }
+    .rank { min-width: 40px; height: 40px; font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Swirling background -->
+  <section class="scene" aria-hidden="true">
+    <div class="stars"></div>
+    <div class="swirl">
+      <div class="ring r1"></div>
+      <div class="ring r2"></div>
+      <div class="ring r3"></div>
+      <div class="ring r4"></div>
+      <div class="ring r5"></div>
+      <div class="texture"></div>
+      <div class="core"></div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <!-- LEFT: Shadow + shimmer and Professional -->
+    <div class="gallery">
+      <img id="imgShadow" class="img shadow" alt="Shadow">
+      <div id="shadowShine" class="shadow-shine" aria-hidden="true"></div>
+      <img id="imgPro" class="img pro" alt="Professional">
+
+      <!-- Foot CTA centered under the feet -->
+      <div class="foot-cta">
+        <a class="cta xl" href="personality.html" id="ctaFoot">TAKE THE ADVENTURER TEST AND FIND YOUR FIT!</a>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <section class="pane">
+      <div class="inner">
+        <h1 id="greeting">Congratulations, Adventurer!</h1>
+
+        <div class="row"><div class="pill" id="totalPill">Total Level: —</div></div>
+
+        <div class="eaWrap">
+          <div class="eaLabel">Elemental Affinity:</div>
+          <h2 id="elemTitle" style="margin:0; font-family:Cinzel,serif;">Loading…</h2>
+          <div class="orbDock"><div class="orb-track" id="orbTrack"></div></div>
+        </div>
+        <p class="muted" id="elemSubtitle"></p>
+        <div class="desc" id="elemDesc">—</div>
+
+        <!-- Gateway: keep adventurer hidden; show big reveal button -->
+        <div class="revealCard">
+          <div class="label">RECOMMENDED ADVENTURER</div>
+          <div class="revealTop">
+            <h2 class="revealTitle">Reveal your Archetype</h2>
+            <a class="cta xl" href="personality.html" id="ctaReveal">CLICK HERE TO KNOW YOUR ADVENTURER</a>
+          </div>
+          <p class="hint">This gateway keeps your archetype hidden. Take the quick test to reveal it and see your full match.</p>
+        </div>
+
+        <!-- Title / Rank recommendations -->
+        <div class="sectionTitle">Guild Title Recommendation:</div>
+        <div class="chips" id="levelChips">
+          <div class="chip" data-level="Aspirant">Aspirant</div>
+          <div class="chip" data-level="Apprentice">Apprentice</div>
+          <div class="chip" data-level="Advanced I">Advanced I</div>
+          <div class="chip" data-level="Advanced II">Advanced II</div>
+          <div class="chip" data-level="Master">Master</div>
+        </div>
+
+        <div class="sectionTitle">Guild Rank Recommendation:</div>
+        <div class="ranks" id="rankRow">
+          <div class="rank" data-r="F">F</div><div class="rank" data-r="E">E</div><div class="rank" data-r="D">D</div>
+          <div class="rank" data-r="C">C</div><div class="rank" data-r="B">B</div><div class="rank" data-r="A">A</div>
+          <div class="rank" data-r="S">S</div><div class="rank" data-r="SS">SS</div><div class="rank" data-r="SSS">SSS</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+<script>
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const safe = x => (x==null ? '' : String(x));
+const dedup = arr => [...new Set(arr)];
+const sortDigits = s => s.split('').sort().join('');
+async function getJSON(path){ try{ const r = await fetch(path,{cache:'no-store'}); if(!r.ok) throw 0; return await r.json(); }catch{ return null; } }
+
+/* level & rank */
+function levelTitle(total){ if(total>=100) return 'Master'; if(total>=76) return 'Advanced II'; if(total>=51) return 'Advanced I'; if(total>=26) return 'Apprentice'; return 'Aspirant'; }
+function baseRankFor(level){ return level==='Master'?'B':level==='Advanced II'?'C':level==='Advanced I'?'D':level==='Apprentice'?'E':'F'; }
+function countVerifications(){ try{ const v=JSON.parse(localStorage.getItem('venguild_verifications')||'{}')||{}; return ['twoIDs','employment','diploma','tor','address','payslip','billing','ecommerce'].reduce((n,k)=>n+(v[k]?1:0),0);}catch{return 0;} }
+function finalRankFor(level){ const L=['F','E','D','C','B','A','S']; const b=L.indexOf(baseRankFor(level)); const steps=Math.min(countVerifications(), L.length-1-b); return L[b+steps]; }
+
+/* element colors */
+const ORB_COLOR = {
+  '1':'#a06e3d',
+  '2':'#ff6a6a',
+  '3':'#4da3ff',
+  '4':'#7ef2b0',
+  '5':'#37e07d'
+};
+
+(async function main(){
+  const raw = localStorage.getItem('venguild_complete_profile');
+  if (!raw){
+    $('#elemTitle').textContent = 'No profile found';
+    $('#elemDesc').textContent  = 'Please go back and complete your profile.';
+    $('#imgShadow').style.display = 'none';
+    $('#imgPro').style.display    = 'none';
+    return;
+  }
+  const payload = JSON.parse(raw);
+
+  const [countries, sectors, programs, elementsFile] = await Promise.all([
+    getJSON('data/country_ethnicity.json'),
+    getJSON('data/sectors.json'),
+    getJSON('data/programs.json'),
+    getJSON('data/elements.json')
+  ]);
+
+  $('#greeting').textContent = `Congratulations, ${safe(payload?.name?.first||'Adventurer')}!`;
+
+  /* Gender -> shadow */
+  const g = (payload.gender||'').toLowerCase();
+  const gCode = (g==='m' || g==='male') ? 'm' : 'f';
+  const shadowPath = `assets/default/shadow_${gCode}.png`;
+
+  /* Region for professional */
+  let regionCode = '';
+  if (Array.isArray(countries)){
+    const c = countries.find(x => safe(x.Country||x.country||x.name).toLowerCase() === safe(payload.citizenship).toLowerCase());
+    if (c){ const rc=safe(c.code||c.Code||c.region||''); regionCode = rc.startsWith('_') ? rc.slice(1) : rc; }
+  }
+  const top = (payload.experience||[]).slice().sort((a,b)=> (b.computedLevel||0) - (a.computedLevel||0))[0];
+
+  /* Sector -> element */
+  const sectorCodeToElem = new Map((sectors||[]).map(s=>[ String(s.Code||s.code||'').trim(), Number(s.ElementCode||s.elementCode||0) ]));
+  const expElems = (payload.experience||[]).map(x=> sectorCodeToElem.get(String(x.code||'').trim()) || 0);
+  const eduElems = (payload.education||[]).map(e=>{
+    const p = (programs||[]).find(q => String(q.Program||q.title||'').trim().toLowerCase() === String(e.program||'').trim().toLowerCase());
+    return Number(p?.ElementCode||p?.elementCode||0);
+  });
+  const comboKey = sortDigits(dedup([...expElems, ...eduElems].filter(Boolean).map(String)).join(''));
+
+  /* Determine combination (no fallback; show CTA button if none/mismatch) */
+  const CTA_HTML = '<a href="profile.html" class="cta" id="addExpEduBtn">➕ Add Work Experience or Education to know your Elemental Affinity</a>';
+  let combo = null;
+  if (Array.isArray(elementsFile)){
+    for (const it of elementsFile){
+      const code = sortDigits(String(it.Code||it.code||''));
+      if (code && code === comboKey){
+        combo = {name: it.Combination||it.name||it.title||`Combo ${code}`, desc: it.Description||it.description||'—', isHTML:false};
+        break;
+      }
+    }
+  }
+  /* If no elements selected or no match, show CTA button instead of fallback text */
+  if (!combo){
+    combo = { name:'Elemental Profile', desc: CTA_HTML, isHTML:true };
+  }
+
+  const expTotal = (payload.experience||[]).reduce((s,x)=> s + Number(x.computedLevel || (x.years||0)*(x.multiplier||0)), 0);
+  const eduTotal = (payload.education||[]).reduce((s,x)=> s + Number(x.multiplier||0), 0);
+  const BasicLevel = 1;
+  const totalLevel = expTotal + eduTotal + BasicLevel;
+  const lvlTitle = levelTitle(totalLevel);
+  const rankFinal = finalRankFor(lvlTitle);
+
+  /* Images */
+  const shadowEl = $('#imgShadow');
+  shadowEl.onload = ()=> shadowEl.classList.add('loaded');
+  shadowEl.src = shadowPath;
+
+  const proEl = $('#imgPro');
+  if (top?.code && regionCode){
+    proEl.onload = ()=> proEl.classList.add('loaded');
+    proEl.src = `assets/professional/${String(top.code).trim()}_${gCode}_${regionCode}.png`;
+  } else {
+    proEl.style.display='none';
+  }
+
+  /* Right panel */
+  $('#elemTitle').textContent = combo.name;
+  const descEl = $('#elemDesc');
+  if (combo.isHTML){ descEl.innerHTML = combo.desc; } else { descEl.textContent = combo.desc; }
+
+  $('#totalPill').textContent = `Total Level: ${totalLevel}`;
+  for (const c of document.querySelectorAll('#levelChips .chip')) c.classList.toggle('active', c.dataset.level===lvlTitle);
+  for (const r of document.querySelectorAll('#rankRow .rank'))   r.classList.toggle('active', r.dataset.r===rankFinal);
+
+  /* Orbs */
+  const digits = (comboKey||'').split('').filter(d => ORB_COLOR[d]);
+  const track = $('#orbTrack');
+  if (!digits.length){ track.parentElement.style.display='none'; }
+  else{
+    const R = 22, spacing = 30;
+    track.style.setProperty('--speed', (digits.length===1?'18s':digits.length===2?'20s':'22s'));
+    track.innerHTML = '';
+    digits.forEach((d,i)=>{
+      const wrap = document.createElement('div');
+      wrap.className = 'orb-wrap';
+      wrap.style.setProperty('--phase', (i*spacing)+'deg');
+      wrap.style.setProperty('--R', R+'px');
+
+      const orb = document.createElement('div');
+      orb.className = 'orb';
+      orb.style.setProperty('--c', ORB_COLOR[d]);
+      orb.style.setProperty('--size', ({'1':28,'2':27,'3':26,'4':26,'5':25}[d]||26));
+
+      const sparks = document.createElement('div');
+      sparks.className = 'sparks';
+
+      wrap.appendChild(orb);
+      wrap.appendChild(sparks);
+      track.appendChild(wrap);
+
+      const rnd = (a,b)=> a + Math.random()*(b-a);
+      const size = parseFloat(getComputedStyle(orb).getPropertyValue('--size')) || 26;
+      const COUNT = 20, minR = size*0.7, maxR = size*1.9;
+      for (let s=0;s<COUNT;s++){
+        const iEl = document.createElement('i');
+        iEl.className = 'spark';
+        iEl.style.setProperty('--col', ORB_COLOR[d]);
+        iEl.style.setProperty('--ang',  rnd(0,360).toFixed(2)+'deg');
+        iEl.style.setProperty('--dist', rnd(minR,maxR).toFixed(1));
+        iEl.style.setProperty('--ssize',rnd(2,5).toFixed(1));
+        iEl.style.setProperty('--dur',  rnd(4.5,9).toFixed(2)+'s');
+        iEl.style.setProperty('--delay',(-rnd(0,8)).toFixed(2)+'s');
+        sparks.appendChild(iEl);
+      }
+    });
+  }
+
+  /* Shadow shimmer */
+  const shineEl = document.getElementById('shadowShine');
+
+  function sizeShineToShadow(){
+    if (!shadowEl.naturalWidth || !shadowEl.naturalHeight) return;
+    const gH = shadowEl.parentElement.clientHeight;
+    const ratio = shadowEl.naturalWidth / shadowEl.naturalHeight;
+    const w = Math.round(gH * ratio);
+    shineEl.style.width = w + 'px';
+    shineEl.style.height = '100%';
+
+    const url = shadowEl.getAttribute('src');
+    shineEl.style.webkitMaskImage = `url('${url}')`;
+    shineEl.style.maskImage = `url('${url}')`;
+    shineEl.style.webkitMaskRepeat = shineEl.style.maskRepeat = 'no-repeat';
+    shineEl.style.webkitMaskSize = shineEl.style.maskSize = '100% 100%';
+    shineEl.style.webkitMaskPosition = shineEl.style.maskPosition = 'center bottom';
+  }
+
+  function sparkle(){
+    const ang = (Math.random()*110 - 55).toFixed(1) + 'deg';
+    const wrap = document.createElement('div');
+    wrap.className = 'glint-wrap';
+    wrap.style.setProperty('--ang', ang);
+    const bar = document.createElement('div');
+    bar.className = 'glint-bar';
+    wrap.appendChild(bar);
+    shineEl.appendChild(wrap);
+    bar.addEventListener('animationend', ()=> wrap.remove(), {once:true});
+  }
+
+  function startShimmer(){
+    sizeShineToShadow();
+    setTimeout(sparkle, 800);
+    setInterval(sparkle, 10000);
+  }
+
+  if (shadowEl.complete){ startShimmer(); } else { shadowEl.addEventListener('load', startShimmer); }
+  window.addEventListener('resize', sizeShineToShadow);
+
+  /* keep stable svh on iOS when bars collapse/rotate */
+  window.addEventListener('orientationchange', ()=> document.body.style.minHeight = '100svh');
+  window.addEventListener('resize', ()=> document.body.style.minHeight = '100svh');
+})();
+</script>
+</body>
+</html>

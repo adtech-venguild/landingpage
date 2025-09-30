@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VENGUILD – Profile Resolver</title>
+<style>
+  :root{ --bg:#0c1116; --card:#0f141a; --text:#e9ecf1; --muted:#9fb0c3; --line:rgba(255,255,255,.08); --accent:#37e07d; --gold:#ffdf9e;}
+  *{box-sizing:border-box} body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial; background:var(--bg); color:var(--text)}
+  .wrap{max-width:1100px; margin:28px auto; padding:0 16px}
+  h1{margin:0 0 6px; font-size:28px; font-family:Cinzel,serif; color:var(--gold)}
+  p{margin:6px 0 18px; color:var(--muted)}
+  .grid{display:grid; grid-template-columns: 1fr 1fr; gap:18px}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px}
+  .images{display:flex; align-items:center; justify-content:center; gap:18px}
+  .images .stack{position:relative; width:420px; height:420px; display:grid; place-items:center; background:#0b1015; border:1px dashed #243145; border-radius:12px}
+  .images img{max-width:92%; max-height:92%; object-fit:contain; position:absolute; inset:0; margin:auto; filter:drop-shadow(0 8px 16px rgba(0,0,0,.4))}
+  .images img.shadow{left:-75px; z-index:1; opacity:.92}
+  .images img.prof{right:-60px; z-index:2}
+  .kv{display:grid; gap:6px}
+  .kv div{display:flex; gap:8px; align-items:baseline}
+  .k{min-width:195px; color:#b9c8da; font-size:13px; text-transform:uppercase; letter-spacing:.06em}
+  .v code{background:#0b1015; border:1px solid #253246; padding:2px 6px; border-radius:6px}
+  pre{margin:0; white-space:pre-wrap; word-break:break-word; background:#0b1015; border:1px solid #243145; padding:10px; border-radius:10px; color:#9ad6bf}
+  .cta{margin-top:16px; display:flex; gap:10px; flex-wrap:wrap}
+  .btn{display:inline-block; background:linear-gradient(135deg, var(--accent), #1aa37c); color:#0b1015; font-weight:800; text-decoration:none; padding:12px 18px; border-radius:12px}
+  .btn.ghost{background:transparent; border:1px dashed #355; color:#9fd}
+  @media (max-width:900px){ .grid{grid-template-columns:1fr} .images .stack{width:100%; height:360px} }
+  .orbs{display:flex; gap:8px; margin-top:8px}
+  .orb{--c:#fff; width:22px; height:22px; border-radius:50%;
+        background: radial-gradient(circle at 32% 28%, transparent 0 38%, rgba(0,0,0,.55) 100%),
+                    radial-gradient(circle at 70% 70%, color-mix(in srgb, var(--c) 70%, transparent), transparent 60%);
+        border:1px solid color-mix(in srgb, var(--c) 60%, transparent 40%);
+        box-shadow:0 0 10px color-mix(in srgb, var(--c) 60%, transparent),
+                   0 0 26px color-mix(in srgb, var(--c) 40%, transparent);
+        opacity:.9}
+  /* Raw personality table */
+  .rows{margin-top:8px; border:1px solid #243145; border-radius:10px; overflow:hidden}
+  .row{display:flex; gap:12px; padding:8px 10px; border-top:1px solid rgba(255,255,255,.05)}
+  .row:first-child{border-top:none}
+  .row .rk{min-width:62px; color:#9fd2ff; font-weight:800; letter-spacing:.04em}
+  .row .rv{flex:1; color:#e9ecf1; font-weight:700}
+  .row .note{color:#9fb0c3; font-size:12px}
+  .pill{display:inline-block; padding:2px 8px; border:1px solid #355; border-radius:999px; background:#0b1015; color:#cfe6ff; font-weight:800; font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Profile Resolver</h1>
+  <p>This resolves your saved profile, computes Elemental Affinity, Level, Title & Rank, and prepares a compact JSON for the personality test.</p>
+
+  <div class="grid">
+    <!-- Left: images -->
+    <div class="card">
+      <h3 style="margin:0 0 8px">Preview</h3>
+      <div class="images">
+        <div class="stack">
+          <img id="imgShadow" class="shadow" alt="Shadow" onerror="this.style.opacity=.25">
+          <img id="imgProf" class="prof" alt="Professional" onerror="this.style.opacity=.25">
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: resolved data -->
+    <div class="card">
+      <h3 style="margin:0 0 8px">Resolved Values</h3>
+      <div class="kv">
+        <div><div class="k">Adventurer</div><div class="v"><code id="outName">—</code></div></div>
+        <div><div class="k">Elemental Affinity</div><div class="v"><code id="outElemNames">—</code></div></div>
+        <div class="orbs" id="orbs"></div>
+        <div><div class="k">Element Codes (unique)</div><div class="v"><code id="outElemCode">—</code></div></div>
+        <div><div class="k">Recommended Title</div><div class="v"><code id="outTitle">—</code></div></div>
+        <div><div class="k">Recommended Rank</div><div class="v"><code id="outRank">—</code></div></div>
+        <div><div class="k">Total Level</div><div class="v"><code id="outTotal">—</code></div></div>
+        <div><div class="k">Experience Level Total</div><div class="v"><code id="outExpTotal">—</code></div></div>
+        <div><div class="k">Education Level Total</div><div class="v"><code id="outEduTotal">—</code></div></div>
+        <div><div class="k">Gender Code</div><div class="v"><code id="outGenderCode">—</code></div></div>
+        <div><div class="k">Region Code</div><div class="v"><code id="outRegion">—</code></div></div>
+        <div><div class="k">Shadow Path</div><div class="v"><code id="outShadow">—</code></div></div>
+        <div><div class="k">Professional Path</div><div class="v"><code id="outProf">—</code></div></div>
+      </div>
+
+      <h4 style="margin:14px 0 6px">Element Description</h4>
+      <pre id="outDesc">—</pre>
+
+      <h4 style="margin:14px 0 6px">Level Breakdown</h4>
+      <pre id="outLevelBreakdown">—</pre>
+
+      <!-- Personality Result (from saved personality summary) -->
+      <h3 style="margin:18px 0 8px">Personality Result</h3>
+      <div class="kv">
+        <div><div class="k">ADVR Code</div><div class="v"><code id="outADVR">—</code></div></div>
+        <div><div class="k">Exalted/Rooted</div><div class="v"><code id="outExRo">—</code></div></div>
+        <div><div class="k">Personality</div><div class="v"><code id="outPersona">—</code></div></div>
+      </div>
+
+      <!-- NEW: raw test computation -->
+      <h3 style="margin:18px 0 6px">Personality Raw Breakdown</h3>
+      <div class="rows" id="rawRows">
+        <!-- injected rows like: A/D - 1A, 1D, 5NT -->
+      </div>
+      <p class="note" style="margin:6px 0 0">
+        Scoring: <span class="pill">Strongly Agree = +2</span> <span class="pill">Agree = +1</span> <span class="pill">Neutral = 0</span> <span class="pill">Disagree = −1</span> <span class="pill">Strongly Disagree = −2</span>.
+        Each question is keyed to the left or right side of its axis; we flip the sign automatically for right-keyed prompts.
+        Ties choose the <em>left</em> letter (except N/T, where a tie yields <b>N</b>).
+      </p>
+
+      <!-- NEW: Mapped Job -->
+      <h3 style="margin:18px 0 8px">Mapped Job (by Required Level bucket)</h3>
+      <div class="kv">
+        <div><div class="k">Bucket (Required Level)</div><div class="v"><code id="outBucket">—</code></div></div>
+        <div><div class="k">Job Class</div><div class="v"><code id="outMapClass">—</code></div></div>
+        <div><div class="k">Job Rank</div><div class="v"><code id="outMapRank">—</code></div></div>
+        <div><div class="k">Final Code</div><div class="v"><code id="outMapFinal">—</code></div></div>
+        <div><div class="k">Epiteth</div><div class="v"><code id="outMapEpiteth">—</code></div></div>
+      </div>
+
+      <div class="cta">
+        <a id="saveJson" class="btn ghost" href="#">💾 Save profile JSON</a>
+        <a href="personalitytest.html" class="btn">Take the personality test →</a>
+        <a href="information.html" class="btn ghost">← Edit profile</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <h3 style="margin:0 0 8px">Raw Saved Payload</h3>
+    <pre id="dump">—</pre>
+  </div>
+</div>
+
+<script>
+/* ---------- config / paths ---------- */
+const PATHS = {
+  countries: 'data/country_ethnicity.json',
+  programs : 'data/programs.json',
+  elements : 'data/elements.json',
+  sectors  : 'data/sectors.json',
+  jobs     : 'data/adventurer_jobs.json'
+};
+const PERSONALITY_KEY = 'venguild_personality';
+const ANSWERS_KEY = 'venguild_personality_answers'; // [{axis:'AD'|'VE'|'NT'|'UR'|'ER', orient:'L'|'R', answer:'SA'|'A'|'N'|'D'|'SD'}, ... 28 items]
+
+const ELEM_NAME = {1:'Earth',2:'Fire',3:'Air',4:'Water',5:'Aether'};
+const ORB_COLOR = {'1':'#5b3a1e','2':'#ff6a6a','3':'#4da3ff','4':'7ef2b0','5':'#37e07d'};
+
+/* ---------- tiny utils ---------- */
+const $ = s => document.querySelector(s);
+async function safeJSON(path){ try{ const r=await fetch(path,{cache:'no-store'}); if(!r.ok) throw 0; return await r.json(); }catch{return [];}}
+
+function genderCode(g){ return (g && g.toLowerCase()==='m') ? '_m' : '_f'; }
+function regionCodeFor(country, countries){
+  const row = (countries||[]).find(x=>{
+    const n = (x.Country||x.name||x.country||'').trim();
+    return n.toLowerCase() === String(country||'').trim().toLowerCase();
+  });
+  let code = row?.region || row?.Region || row?.code || row?.Code || '';
+  code = String(code||'').trim();
+  if (!code) return '';
+  if (!code.startsWith('_')) code = '_'+code;
+  return code.toLowerCase();
+}
+function pickTopExperience(exps){
+  if (!Array.isArray(exps) || !exps.length) return null;
+  return [...exps].sort((a,b)=>{
+    const A = Number(a.computedLevel || 0), B = Number(b.computedLevel || 0);
+    if (B !== A) return B - A;
+    const Ay = Number(a.years || 0), By = Number(b.years || 0);
+    return (By - Ay);
+  })[0];
+}
+function uniqueSortedDigits(arr){
+  const s = Array.from(new Set(arr.filter(Boolean).map(Number)));
+  s.sort((a,b)=>a-b);
+  return s.join('');
+}
+function namesFromCodes(codeStr){ return codeStr.split('').map(d=>ELEM_NAME[+d]).filter(Boolean); }
+function findElementDesc(codeStr, list){
+  if (!codeStr) return null;
+  const want = codeStr.split('').sort().join('');
+  for (const row of (list||[])){
+    const code = String(row.Code||row.code||'').split('').sort().join('');
+    if (code===want) return {description: row.Description||row.description||'', combo: row.Combination||row.combination||''};
+  }
+  return null;
+}
+
+/* ---------- Title & Rank logic ---------- */
+function levelTitle(total){
+  if(total>=100) return 'Master';
+  if(total>=76)  return 'Advanced II';
+  if(total>=51)  return 'Advanced I';
+  if(total>=26)  return 'Apprentice';
+  return 'Aspirant';
+}
+function baseRankFor(level){
+  return level==='Master'      ? 'B' :
+         level==='Advanced II' ? 'C' :
+         level==='Advanced I'  ? 'D' :
+         level==='Apprentice'  ? 'E' : 'F';
+}
+function countVerifications(){
+  try{
+    const v = JSON.parse(localStorage.getItem('venguild_verifications')||'{}')||{};
+    return ['twoIDs','employment','diploma','tor','address','payslip','billing','ecommerce']
+      .reduce((n,k)=>n+(v[k]?1:0),0);
+  }catch{ return 0; }
+}
+function finalRankFor(level){
+  const L = ['F','E','D','C','B','A','S'];
+  const base = baseRankFor(level);
+  const bI = L.indexOf(base);
+  const steps = Math.min(countVerifications(), L.length-1-bI);
+  return L[bI+steps];
+}
+
+/* ---------- Bucket & job mapping ---------- */
+function bucketFromTotal(total){
+  if (total > 100) return 100;
+  if (total > 50)  return 50;
+  return 0;
+}
+function rankPreferenceForBucket(bucket){
+  if (bucket === 100) return ['Master 2','Master 1','Master'];
+  if (bucket === 50)  return ['Alternate 2','Alternate 1','Alternate'];
+  return ['Base Class'];
+}
+function pickJobMatch(jobs, bucket, advr, exro){
+  const pool = (jobs||[]).filter(j=>{
+    const rl = Number(j['Required Level'] ?? j.RequiredLevel ?? j.requiredLevel ?? 0);
+    const ac = String(j['ADVR Code'] || j.ADVR || j.advr || '').trim().toUpperCase();
+    const er = String(j['Exalted/Rooted'] || j.ExaltedRooted || j.exaltedRooted || '').trim();
+    return rl===bucket && ac===String(advr||'').toUpperCase() && er===String(exro||'');
+  });
+  if (!pool.length) return null;
+
+  const pref = rankPreferenceForBucket(bucket).map(s=>s.toLowerCase());
+  const scored = pool.map(x=>{
+    const jr = String(x['Job Rank']||'').toLowerCase();
+    const score = Math.max(...pref.map((p,i)=> jr.includes(p) ? (100 - i) : -1));
+    return {row:x, score};
+  }).sort((a,b)=>b.score - a.score);
+  return scored[0]?.row || pool[0];
+}
+
+/* ---------- Personality raw computation ---------- */
+const AXES = {
+  AD: ['A','D'],
+  VE: ['V','E'],
+  NT: ['N','T'],
+  UR: ['U','R'],
+  ER: ['E','R']
+};
+const SCORE = { SA:2, A:1, N:0, D:-1, SD:-2 };
+
+// Returns { breakdown:{AD:{A,D,NT,score}, ...}, winners:{AD:'A'|'D', ...}, advrCode, ER }
+function computeFromAnswers(answers){
+  const breakdown = { AD:{A:0,D:0,NT:0,score:0}, VE:{V:0,E:0,NT:0,score:0}, NT:{N:0,T:0,NT:0,score:0}, UR:{U:0,R:0,NT:0,score:0}, ER:{E:0,R:0,NT:0,score:0} };
+
+  (answers||[]).forEach(q=>{
+    const axis = (q.axis||'').toUpperCase();
+    if(!AXES[axis]) return;
+    const orient = (q.orient||'L').toUpperCase(); // L or R – which side "agree" favors
+    const raw = (q.answer||'N').toUpperCase();
+    const base = SCORE[raw]==null ? 0 : SCORE[raw];
+
+    const sign = orient==='R' ? -1 : 1;
+    const effect = base * sign;
+    breakdown[axis].score += effect;
+
+    if(base===0){ breakdown[axis].NT++; return; }
+
+    const [L,R] = AXES[axis];
+    if(effect>0) breakdown[axis][L]++; else if(effect<0) breakdown[axis][R]++;
+  });
+
+  const winners = {};
+  for(const k of Object.keys(AXES)){
+    const [L,R] = AXES[k];
+    const s = breakdown[k].score;
+    if(k==='NT' && s===0) winners[k]=L; // N/T ties -> N
+    else winners[k] = s>=0 ? L : R;     // ties choose Left by default
+  }
+
+  const advrCode = winners.AD + winners.VE + winners.NT + winners.UR; // 4 letters
+  const ERpick   = winners.ER;
+
+  return { breakdown, winners, advrCode, ER: ERpick };
+}
+
+/* ========================================= */
+(async function main(){
+  // Read raw payload
+  const saved = localStorage.getItem('venguild_complete_profile');
+  $('#dump').textContent = saved || 'No profile found. Please complete your profile first.';
+  if (!saved){
+    document.querySelector('.cta')?.insertAdjacentHTML('afterbegin','<a href="information.html" class="btn">Complete your profile →</a>');
+    return;
+  }
+  const payload = JSON.parse(saved);
+
+  // Load reference data (including jobs)
+  const [countries, programs, elements, sectors, jobs] = await Promise.all([
+    safeJSON(PATHS.countries),
+    safeJSON(PATHS.programs),
+    safeJSON(PATHS.elements),
+    safeJSON(PATHS.sectors),
+    safeJSON(PATHS.jobs)
+  ]);
+
+  // Mappings
+  const sectorCodeToElem = new Map((sectors||[]).map(s => [
+    String(s.Code||s.code||'').trim(),
+    Number(s.ElementCode||s.elementCode||0)
+  ]));
+
+  // Resolve gender/region/paths
+  const gCode = genderCode(payload.gender);
+  const rCode = regionCodeFor(payload.citizenship, countries);
+  const shadowPath = `assets/default/shadow${gCode}.png`;
+
+  const top = pickTopExperience(payload.experience);
+  const profCode = top?.code || '';
+  const profPath = (profCode && gCode && rCode) ? `assets/professional/${profCode}${gCode}${rCode}.png` : '';
+
+  // Elemental affinity
+  const expElemCodes = (payload.experience||[]).map(x => sectorCodeToElem.get(String(x.code||'').trim()) || 0);
+  const eduElems = [];
+  for (const e of (payload.education||[])) {
+    const programName = (e.program||'').trim().toLowerCase();
+    const row = programs.find(p => String(p.Program||p.title||'').trim().toLowerCase() === programName);
+    const ec = Number(row?.ElementCode || row?.elementCode || 0);
+    if (ec) eduElems.push(ec);
+  }
+  const allElemCodes = uniqueSortedDigits([...expElemCodes, ...eduElems]);
+  const elemNames = namesFromCodes(allElemCodes);
+  const descHit = findElementDesc(allElemCodes, elements);
+  const description = descHit?.description || '—';
+  const comboLabel = descHit?.combo || (elemNames.length ? elemNames.join(' + ') : '—');
+
+  // Totals
+  let expTotal=0, eduTotal=0;
+  const expLines=[], eduLines=[];
+  (payload.experience || []).forEach(x=>{
+    const years=+x.years||0, mult=+x.multiplier||0;
+    const comp = +x.computedLevel || (years*mult);
+    expTotal += comp;
+    const label = x.industry || x.sector || x.code || '—';
+    expLines.push(`${label}: ${years}y × ${mult} = ${comp}`);
+  });
+  (payload.education || []).forEach(e=>{
+    const mult=+e.multiplier||0; eduTotal += mult;
+    const label = `${e.program||'—'} (${e.level||'—'})`;
+    eduLines.push(`${label} → ${mult}`);
+  });
+  const totalLevel = expTotal + eduTotal;
+
+  // Title & Rank
+  const title = levelTitle(totalLevel);
+  const rank  = finalRankFor(title);
+
+  // Adventurer name
+  const nameFull = [
+    payload?.name?.first || '',
+    payload?.name?.middle ? payload.name.middle + '.' : '',
+    payload?.name?.last || ''
+  ].filter(Boolean).join(' ').trim();
+
+  // Paint base UI
+  $('#outName').textContent      = nameFull || '—';
+  $('#outElemNames').textContent = comboLabel || '—';
+  $('#outElemCode').textContent  = allElemCodes || '—';
+  $('#outTitle').textContent     = title;
+  $('#outRank').textContent      = rank;
+  $('#outTotal').textContent     = String(totalLevel);
+  $('#outExpTotal').textContent  = String(expTotal);
+  $('#outEduTotal').textContent  = String(eduTotal);
+  $('#outGenderCode').textContent= gCode || '—';
+  $('#outRegion').textContent    = rCode || '—';
+  $('#outShadow').textContent    = shadowPath || '—';
+  $('#outProf').textContent      = profPath || '—';
+  $('#outDesc').textContent      = `${comboLabel}\n\n${description}`;
+
+  const breakdownText = ['Experience:',...expLines,'','Education:',...eduLines].join('\n');
+  $('#outLevelBreakdown').textContent = breakdownText;
+
+  if (shadowPath) $('#imgShadow').src = shadowPath;
+  if (profPath)   $('#imgProf').src   = profPath;
+
+  // Orbs
+  const orbs = $('#orbs'); orbs.innerHTML = '';
+  allElemCodes.split('').forEach(d=>{
+    if (!ORB_COLOR[d]) return;
+    const o = document.createElement('span');
+    o.className='orb';
+    o.style.setProperty('--c', ORB_COLOR[d]);
+    orbs.appendChild(o);
+  });
+
+  /* -------- Personality summary fields -------- */
+  let advrCode = null, exaltedRooted = null, personality = null, savedBreakdown=null;
+  try{
+    const p = JSON.parse(localStorage.getItem(PERSONALITY_KEY) || 'null');
+    advrCode = (p?.advrCode || p?.ADVR || p?.code || '').toUpperCase() || null;
+    exaltedRooted = (p?.exaltedRooted ?? p?.ER ?? 'n/a');
+    personality = (p?.personality || p?.result || advrCode || '').toUpperCase() || null;
+    savedBreakdown = p?.breakdown || null;
+  }catch{}
+
+  $('#outADVR').textContent   = advrCode || '—';
+  $('#outExRo').textContent   = exaltedRooted || '—';
+  $('#outPersona').textContent= personality || '—';
+
+  /* -------- RAW ANSWERS → breakdown (28 Q, 7 per axis) -------- */
+  let answers = [];
+  try{ answers = JSON.parse(localStorage.getItem(ANSWERS_KEY) || '[]'); }catch{}
+
+  if (Array.isArray(answers) && answers.length){
+    const calc = computeFromAnswers(answers);
+
+    // Show rows
+    const rows = $('#rawRows'); rows.innerHTML='';
+    function line(label, data, L,R){
+      const row = document.createElement('div'); row.className='row';
+      const rk = document.createElement('div'); rk.className='rk'; rk.textContent = label;
+      const rv = document.createElement('div'); rv.className='rv';
+      rv.textContent = `${data[L]||0}${L}, ${data[R]||0}${R}, ${(data.NT||0)}NT`;
+      const note = document.createElement('div'); note.className='note';
+      note.textContent = `score ${data.score>0?'+':''}${data.score} → ${calc.winners[label.replace('/','')]}`;
+      row.append(rk,rv,note); rows.appendChild(row);
+    }
+    line('A/D', calc.breakdown.AD, 'A','D');
+    line('V/E', calc.breakdown.VE, 'V','E');
+    line('N/T', calc.breakdown.NT, 'N','T');
+    line('U/R', calc.breakdown.UR, 'U','R');
+    line('E/R', calc.breakdown.ER, 'E','R');
+
+    // If we didn't have a personality summary yet, or it lacked breakdown, save/merge it now
+    const current = (()=>{ try{return JSON.parse(localStorage.getItem(PERSONALITY_KEY)||'{}');}catch{return {}} })();
+    const merged = {
+      ...current,
+      advrCode: (current.advrCode || advrCode || calc.advrCode || '').toUpperCase(),
+      exaltedRooted: (current.exaltedRooted || exaltedRooted || calc.ER || 'n/a'),
+      personality: (current.personality || personality || calc.advrCode || '').toUpperCase(),
+      breakdown: {
+        AD:{A:calc.breakdown.AD.A||0,D:calc.breakdown.AD.D||0,NT:calc.breakdown.AD.NT||0},
+        VE:{V:calc.breakdown.VE.V||0,E:calc.breakdown.VE.E||0,NT:calc.breakdown.VE.NT||0},
+        NT:{N:calc.breakdown.NT.N||0,T:calc.breakdown.NT.T||0,NT:calc.breakdown.NT.NT||0},
+        UR:{U:calc.breakdown.UR.U||0,R:calc.breakdown.UR.R||0,NT:calc.breakdown.UR.NT||0},
+        ER:{E:calc.breakdown.ER.E||0,R:calc.breakdown.ER.R||0,NT:calc.breakdown.ER.NT||0}
+      }
+    };
+    localStorage.setItem(PERSONALITY_KEY, JSON.stringify(merged));
+
+    // reflect merged values in the visible summary
+    $('#outADVR').textContent = merged.advrCode || '—';
+    $('#outExRo').textContent = merged.exaltedRooted || '—';
+    $('#outPersona').textContent = merged.personality || '—';
+
+  } else {
+    // No raw answers found; still show placeholder rows
+    const rows = $('#rawRows'); rows.innerHTML='';
+    ['A/D','V/E','N/T','U/R','E/R'].forEach(lbl=>{
+      const row = document.createElement('div'); row.className='row';
+      row.innerHTML = `<div class="rk">${lbl}</div><div class="rv">—</div><div class="note">no answers found</div>`;
+      rows.appendChild(row);
+    });
+  }
+
+  /* -------- Bucket + Job mapping -------- */
+  const bucket = bucketFromTotal(totalLevel);
+  $('#outBucket').textContent = String(bucket);
+
+  let mappedJob = null;
+  const finalADVR = ($('#outADVR').textContent||'').trim();
+  const finalER   = ($('#outExRo').textContent||'').trim();
+  if (finalADVR && finalER && Array.isArray(jobs) && jobs.length){
+    mappedJob = pickJobMatch(jobs, bucket, finalADVR, finalER);
+  }
+
+  if (mappedJob){
+    $('#outMapClass').textContent   = mappedJob['Job Class'] || '—';
+    $('#outMapRank').textContent    = mappedJob['Job Rank']  || '—';
+    $('#outMapFinal').textContent   = mappedJob['Final Code']|| '—';
+    $('#outMapEpiteth').textContent = mappedJob['Epiteth']   || '—';
+  }else{
+    $('#outMapClass').textContent   = '—';
+    $('#outMapRank').textContent    = '—';
+    $('#outMapFinal').textContent   = '—';
+    $('#outMapEpiteth').textContent = '—';
+  }
+
+  /* -------- Persist compact profile (now includes personality + mapping) -------- */
+  const profileSummary = {
+    name: {
+      first: payload?.name?.first || '',
+      middle: payload?.name?.middle || null,
+      last: payload?.name?.last || '',
+      full: nameFull
+    },
+    elementalAffinity: {
+      codes: allElemCodes,
+      names: elemNames,
+      label: descHit?.combo || comboLabel,
+      description
+    },
+    totals: {
+      experience: expTotal,
+      education : eduTotal,
+      total     : totalLevel,
+      bucket    : bucket
+    },
+    recommendation: { title, rank },
+    personality: JSON.parse(localStorage.getItem(PERSONALITY_KEY) || '{}'),
+    mappedJob: mappedJob ? {
+      jobClass  : mappedJob['Job Class'] || null,
+      jobRank   : mappedJob['Job Rank'] || null,
+      finalCode : mappedJob['Final Code'] || null,
+      epiteth   : mappedJob['Epiteth'] || null,
+      requiredLevel: mappedJob['Required Level'] ?? null
+    } : null,
+    assets: {
+      shadow: shadowPath || null,
+      professional: profPath || null,
+      regionCode: rCode || '',
+      genderCode: gCode || ''
+    },
+    raw: { sectorTopCode: top?.code || null },
+    savedAt: new Date().toISOString()
+  };
+
+  localStorage.setItem('venguild_profile', JSON.stringify(profileSummary));
+
+  // Download button
+  (function makeDownload(json){
+    const a = document.getElementById('saveJson');
+    if(!a) return;
+    const blob = new Blob([JSON.stringify(json, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    a.href = url;
+    a.download = 'venguild_profile.json';
+  })(profileSummary);
+})();
+</script>
+</body>
+</html>

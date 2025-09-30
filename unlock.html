@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VENGUILD – Archetype Reveal (Unlock)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c1116; --card:#0f141a; --line:rgba(255,255,255,.08);
+    --text:#e9ecf1; --muted:#a9b4c1; --gold:#ffdf9e; --accent:#37e07d;
+
+    --pair-gap-mobile: clamp(16px, 12vw, 72px);
+    --pair-gap-wide:   clamp(40px, 10vw, 160px);
+    --finish-left: 50%;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%; margin:0}
+  body{
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    background: var(--bg); color: var(--text);
+    min-height: 100dvh; display:grid; place-items:center; padding:14px;
+    background-image: linear-gradient(to bottom, rgba(6,12,18,.55), rgba(6,12,18,.6)), url("assets/background/background1.png");
+    background-size:cover; background-position:center; background-attachment: fixed;
+  }
+
+  .wrap{
+    width:min(1200px,96vw);
+    display:grid; gap:22px;
+    grid-template-columns: 0.95fr 1.3fr;
+    animation:fade .45s ease;
+    position:relative; z-index:1;
+  }
+  @keyframes fade{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+
+  /* ===== Stage ===== */
+  .gallery{ position:relative; min-height: clamp(420px, 65vh, 760px); overflow:visible; }
+  .img{
+    position:absolute; bottom:0; height:100%; width:auto; object-fit:contain;
+    -webkit-user-drag:none; user-select:none; pointer-events:none; touch-action:none;
+    filter: drop-shadow(0 14px 28px rgba(0,0,0,.55));
+    opacity:0; transform:translate(-50%,6px); transition:opacity .6s ease, transform .6s ease;
+  }
+  .img.loaded{ opacity:1; transform:translate(-50%,0); }
+  .hero{ left: calc(45% - var(--pair-gap-mobile)/2); z-index:6; }
+  .pro  { left: calc(55% + var(--pair-gap-mobile)/2); z-index:7; }
+  @media (min-width: 1200px){
+    .hero{ left: calc(50% - var(--pair-gap-wide)/2); }
+    .pro  { left: calc(50% + var(--pair-gap-wide)/2); }
+  }
+
+  .assetError{
+    position:absolute; left:50%; transform:translateX(-50%); bottom:64px;
+    background:#1e2a3b; color:#ffd7d7; border:1px solid #6b2b2b;
+    padding:10px 12px; border-radius:12px; font-size:13px; display:none;
+    max-width:92%; z-index:9; text-align:center;
+  }
+
+  .finishBtn{
+    position:absolute; bottom:6px; left: var(--finish-left); transform:translateX(-50%);
+    display:inline-block; text-decoration:none; text-transform:uppercase;
+    font-weight:900; letter-spacing:.04em; color:#2a1a00;
+    background:linear-gradient(135deg,#ffe27a,#ffd35a,#ffb800);
+    box-shadow:0 18px 22px rgba(0,0,0,.45), 0 0 18px rgba(255,216,112,.55), inset 0 0 10px rgba(255,255,255,.28);
+    border:1px solid rgba(255,244,198,.65); border-radius:999px;
+    transition:transform .15s ease, box-shadow .2s ease, filter .2s ease;
+    z-index:10; font-size: clamp(16px, 2.2vw, 20px);
+    padding: clamp(10px, 1.8vw, 14px) clamp(18px, 2.4vw, 24px);
+    min-width: clamp(180px, 28vw, 280px);
+  }
+  .finishBtn:hover{ transform:translateX(-50%) translateY(-1px) scale(1.02);
+    box-shadow:0 14px 28px rgba(0,0,0,.55), 0 0 26px rgba(255,216,112,.75), inset 0 0 12px rgba(255,255,255,.35); }
+
+  /* ===== Right Panel ===== */
+  .pane{ position:relative; z-index:5; }
+  .pane::before{
+    content:""; position:absolute; inset:-26px; border-radius:24px;
+    background: radial-gradient(120% 80% at 80% 40%, rgba(111,227,255,.10), transparent 60%),
+               radial-gradient(90% 70%  at 20% 70%, rgba(55,224,125,.10),  transparent 65%), rgba(10,16,23,.55);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 20px 80px rgba(0,0,0,.55),
+                inset 0 0 200px rgba(55,224,125,.10), inset 0 0 140px rgba(111,227,255,.08);
+    backdrop-filter: blur(6px); pointer-events:none;
+  }
+  .inner{ padding:12px 14px; position:relative; }
+
+  h1{ font-family:Cinzel,serif; margin:2px 2px 8px; font-size: clamp(28px, 4.2vw, 46px); color: var(--gold); line-height:1.15; }
+  .muted{color:var(--muted)}
+  .chipsRow{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:8px 2px 6px}
+  .chip{
+    padding:8px 12px; border-radius:999px; border:1px solid #1b2738; background:#0b1015;
+    font-weight:700; color:#cfe6ff; letter-spacing:.02em;
+  }
+  .chip.linklike{cursor:pointer; text-decoration:none}
+  .rank{ min-width:44px; height:44px; padding:0 12px; display:grid; place-items:center;
+    border-radius:10px; border:1px solid #5f80ae; background:#0b1015; color:#cfe6ff; font-weight:900; font-size:20px; }
+  .pill{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; font-weight:800;
+    color:#0c1116; background:linear-gradient(135deg, var(--accent), #2cd18c, #1aa37c); }
+
+  .sectionTitle{font-weight:900; letter-spacing:.05em; margin:12px 2px 6px; color:#cfe3ff; text-transform:uppercase; font-size:13px}
+  .desc{ background:#0b1015; border:1px solid #1b2738; border-radius:14px; padding:16px; line-height:1.7; margin:8px 2px 0; opacity:0; transform:translateY(6px); animation:fadeInUp .45s ease .08s forwards }
+  @keyframes fadeInUp{ to{opacity:1; transform:none} }
+  .jobHead{ font-family:Cinzel,serif; font-size: clamp(26px, 4.2vw, 40px); font-weight:900; margin:0 0 2px; }
+  .jobSub{ font-size: clamp(14px, 2vw, 16px); color:#9fd2ff; margin:0 0 10px; letter-spacing:.02em; font-weight:700; }
+
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin:0 2px 8px}
+  .chip.active{
+    color:#0c1116; border-color:transparent; background:linear-gradient(135deg, #ffe27a, #ffd35a, #ffb800);
+    box-shadow:0 0 12px rgba(255,216,112,.45), inset 0 0 8px rgba(255,255,255,.25);
+  }
+  .ranks{display:flex; gap:8px; flex-wrap:wrap; margin:0 2px}
+  .rank.active{
+    color:#0c1116; background:linear-gradient(135deg,#a0f2ff,#6fe3ff);
+    box-shadow:0 0 16px rgba(160,242,255,.5), inset 0 0 10px rgba(255,255,255,.25);
+  }
+
+  .eaWrap{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:6px 2px 0 2px }
+  .eaLabel{ font-weight:800; color:#cfe3ff; letter-spacing:.04em; text-transform:uppercase; font-size:12px; }
+  .orbDock{ --R:22px; --speed:22s; position: relative; width: calc(var(--R) * 2); height: calc(var(--R) * 2); pointer-events:none; filter: drop-shadow(0 6px 14px rgba(0,0,0,.45)); }
+  .orb-track{ position:absolute; inset:0; border-radius:50%; animation:orb-ccw var(--speed) linear infinite; }
+  @keyframes orb-ccw{ to{ transform:rotate(-360deg);} }
+  .orb-wrap{ position:absolute; top:50%; left:50%; transform: rotate(var(--phase)) translateX(var(--R)) translate(-50%,-50%); }
+  .orb{
+    --size:26; --c:#fff; --core: color-mix(in srgb, var(--c) 80%, white 35%); --glow: color-mix(in srgb, var(--c) 85%, white 25%);
+    position:absolute; top:50%; left:50%; width:calc(var(--size)*1px); height:calc(var(--size)*1px);
+    transform:translate(-50%, -50%); border-radius:50%;
+    background: radial-gradient(circle at 30% 28%, rgba(255,255,255,.55) 0 22%, transparent 45%),
+                radial-gradient(circle at 50% 50%, var(--core) 0 60%, transparent 62%);
+    border:1px solid color-mix(in srgb, var(--c) 65%, transparent 35%);
+    box-shadow:0 0 14px var(--glow), 0 0 36px var(--glow), 0 0 84px color-mix(in srgb, var(--glow) 85%, transparent), 0 0 140px color-mix(in srgb, var(--glow) 70%, transparent);
+  }
+  .orb::before{ content:""; position:absolute; inset:-22px; border-radius:50%; background: radial-gradient(circle, color-mix(in srgb, var(--glow) 20%, transparent) 0%, transparent 68%); filter: blur(16px); opacity:.55; animation: orb-pulse 3.6s ease-in-out infinite; }
+  .orb::after { content:""; position:absolute; inset:-40px; border-radius:50%; background: radial-gradient(circle, color-mix(in srgb, var(--glow) 35%, transparent) 0%, transparent 70%); filter: blur(22px); opacity:.9; mix-blend-mode: screen; }
+  @keyframes orb-pulse { 0%,100% { opacity:.55 } 50% { opacity:.8 } }
+
+  /* Static background rings */
+  .vg-scene{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0;}
+  .vg-stars,.vg-ring,.vg-texture,.vg-core{ animation:none !important; }
+  .vg-stars{
+    position:absolute; inset:-12%;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,.25) 0 1px, transparent 2px) 0 0/180px 180px,
+      radial-gradient(circle at 70% 60%, rgba(255,255,255,.18) 0 1px, transparent 2px) 0 0/220px 220px,
+      radial-gradient(circle at 50% 50%, rgba(255,255,255,.10) 0 1px, transparent 2px) 0 0/260px 260px;
+    opacity:1; filter: blur(.2px);
+  }
+  .vg-swirl{ position:absolute; left:50%; top:50%; width:max(180vmax,180vw); height:max(180vmax,180vh); transform:translate(-50%,-50%); filter: drop-shadow(0 10px 22px rgba(0,0,0,.45)); }
+  .vg-ring{ position:absolute; inset:0; border-radius:50%; background: conic-gradient(from 0deg, transparent 0 58%, rgba(60,170,160,.16) 62%, rgba(120,230,210,.20) 67%, transparent 72%); -webkit-mask: radial-gradient(circle, transparent 59%, black 62%, black 68%, transparent 71%); mask: radial-gradient(circle, transparent 59%, black 62%, black 68%, transparent 71%); mix-blend-mode: screen; opacity:.9; }
+  .vg-r1{ transform: scale(.82); } .vg-r2{ transform: scale(1.00); } .vg-r3{ transform: scale(1.22); } .vg-r4{ transform: scale(1.45); } .vg-r5{ transform: scale(1.72); opacity:.85; }
+  .vg-texture{ position:absolute; inset:-20%; background: radial-gradient(circle at 50% 50%, rgba(30,140,130,.22), transparent 60%), repeating-radial-gradient(circle at 50% 60%, rgba(255,255,255,.035) 0 2px, transparent 2px 6px); mix-blend-mode: screen; opacity:.55; }
+  .vg-core{ position:absolute; left:50%; top:50%; width:42vmin; height:42vmin; transform:translate(-50%,-50%); border-radius:50%; background: radial-gradient(circle at 50% 52%, rgba(140,255,230,.28) 0 55%, rgba(20,120,110,.12) 60%, transparent 70%); filter: blur(0px) saturate(1.05); opacity:.70; }
+
+  @media (max-width: 1080px){ .wrap{ grid-template-columns:1fr } }
+
+  /* Popovers */
+  .trophy-wrap, .alter-wrap{ position:relative; display:inline-block; }
+  .trophy-pop, .alter-pop{
+    position:absolute; left:0; top:calc(100% + 8px);
+    background:#0b1015; border:1px solid #1b2738; border-radius:12px;
+    box-shadow:0 12px 30px rgba(0,0,0,.55);
+    padding:10px 12px; min-width:320px; z-index:50; display:none;
+  }
+  .trophy-pop.show, .alter-pop.show{ display:block; }
+  .trophy-pop .row{ display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-bottom:1px dashed rgba(255,255,255,.06); }
+  .trophy-pop .row:last-child{ border-bottom:none; }
+  .trophy-pop .k{ color:#9fd2ff; font-weight:800; letter-spacing:.04em; }
+  .trophy-pop .v{ color:#e9ecf1; font-weight:700; }
+
+  /* Alter layout */
+  .evo-grid{
+    display:grid;
+    grid-template-columns: 110px 110px 24px 110px; /* base spans rows 1-2 in col 1 */
+    grid-auto-rows: minmax(110px, auto);
+    gap:10px 12px; align-items:center;
+  }
+  .base-cell{ grid-column:1 / 2; grid-row:1 / 3; }
+  .row1-adv{ grid-column:2 / 3; grid-row:1 / 2; }
+  .row1-master{ grid-column:4 / 5; grid-row:1 / 2; }
+  .row2-adv{ grid-column:2 / 3; grid-row:2 / 3; }
+  .row2-master{ grid-column:4 / 5; grid-row:2 / 3; }
+  .arrow-col{ grid-column:3 / 4; text-align:center; font-size:20px; color:#9fd2ff; }
+  .arrow-col::after{ content:"→"; }
+
+  .thumb-card{
+    background:#0a0f15; border:1px solid #1b2738; border-radius:12px; overflow:hidden;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    width:110px; height:110px; transition:box-shadow .2s ease, border-color .2s ease;
+  }
+  .thumb-card img{ width:100%; height:78px; object-fit:contain; }
+  .thumb-cap{ font-size:11px; color:#cfe3ff; padding:4px 6px; text-align:center; line-height:1.25; min-height:28px; }
+  .thumb-card.current{ border-color:#ffcf69; box-shadow:0 0 0 2px rgba(255,216,112,.45), inset 0 0 12px rgba(255,255,255,.18); }
+
+  .alter-note{ font-size:12px; color:#cfe3ff; margin-top:8px; }
+  .alter-actions{ display:flex; justify-content:flex-end; margin-top:8px; }
+  .btn-mini{ padding:6px 10px; border-radius:999px; background:#133; border:1px solid #255; color:#9fe; text-decoration:none; font-weight:800; }
+</style>
+</head>
+<body>
+
+  <!-- Static background -->
+  <section class="vg-scene" aria-hidden="true">
+    <div class="vg-stars"></div>
+    <div class="vg-swirl">
+      <div class="vg-ring vg-r1"></div><div class="vg-ring vg-r2"></div><div class="vg-ring vg-r3"></div>
+      <div class="vg-ring vg-r4"></div><div class="vg-ring vg-r5"></div>
+      <div class="vg-texture"></div><div class="vg-core"></div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <div class="gallery">
+      <img id="imgPro"  class="img pro"  alt="Professional">
+      <img id="imgHero" class="img hero" alt="Adventurer">
+      <div id="assetError" class="assetError"></div>
+      <a id="finishBtn" class="finishBtn" href="zone.html">Finish this quest!</a>
+    </div>
+
+    <section class="pane">
+      <div class="inner">
+        <h1 id="greeting">The Guild has weighed your essence.</h1>
+
+        <div class="chipsRow">
+          <div class="chip" id="typeChip">Type: —</div>
+          <div class="chip">Level: <span id="lvl" style="margin-left:6px;font-weight:900">—</span></div>
+          <div class="chip">Rank: <span id="rankBox">—</span></div>
+        </div>
+        <p id="lvlNote" class="muted" style="display:none; font-size:12px; margin:2px 2px 6px"></p>
+
+        <div class="sectionTitle" style="margin-top:6px">Recommended Adventurer</div>
+        <div class="desc" id="jobBlock">
+          <div id="jobHead" class="jobHead">—</div>
+          <p class="jobSub" id="jobClass">—</p>
+          <div id="description">—</div>
+        </div>
+
+        <div class="chipsRow">
+          <a class="chip linklike" href="personality.html">↺ Retake the quick test</a>
+          <a class="chip linklike" style="border-style:dashed" href="personality_deep.html">🜂 Take a deeper assessment</a>
+
+          <span class="trophy-wrap">
+            <span id="resultBadge" class="chip linklike" title="Show result breakdown">🏆 Result Combination</span>
+            <div id="resultPopover" class="trophy-pop" role="dialog" aria-label="Result breakdown"></div>
+          </span>
+
+          <span class="alter-wrap">
+            <span id="alterBadge" class="chip linklike" title="See alter archetypes">🧭 See your alter archetype</span>
+            <div id="alterPopover" class="alter-pop" role="dialog" aria-label="Alter archetype">
+              <div id="evoGrid" class="evo-grid"></div>
+              <div class="alter-note">Expand / Explore alternative paths from your class.</div>
+              <div class="alter-actions"><a id="alterExplore" class="btn-mini" href="archetypes.html">Explore</a></div>
+            </div>
+          </span>
+        </div>
+
+        <p class="muted" style="font-size:13px; margin:2px 2px 6px">
+          This is a recommendation based on your personality responses. You can retake the quick test, or try a deeper assessment for more nuanced results.
+        </p>
+
+        <div class="chipsRow" style="margin-top:8px"><div class="pill" id="totalPill">Total Level: —</div></div>
+
+        <div class="eaWrap">
+          <div class="eaLabel">Elemental Affinity:</div>
+          <h2 id="elemTitle" style="margin:0; font-family:Cinzel,serif;">Loading…</h2>
+          <div class="orbDock"><div class="orb-track" id="orbTrack"></div></div>
+        </div>
+        <p class="muted" id="elemSubtitle"></p>
+        <div class="desc" id="elemDesc">—</div>
+
+        <div class="sectionTitle">Guild Title Recommendation:</div>
+        <div class="chips" id="levelChips">
+          <div class="chip" data-level="Aspirant">Aspirant</div>
+          <div class="chip" data-level="Apprentice">Apprentice</div>
+          <div class="chip" data-level="Advanced I">Advanced I</div>
+          <div class="chip" data-level="Advanced II">Advanced II</div>
+          <div class="chip" data-level="Master">Master</div>
+        </div>
+
+        <div class="sectionTitle">Guild Rank Recommendation:</div>
+        <div class="ranks" id="rankRow">
+          <div class="rank" data-r="F">F</div><div class="rank" data-r="E">E</div><div class="rank" data-r="D">D</div>
+          <div class="rank" data-r="C">C</div><div class="rank" data-r="B">B</div><div class="rank" data-r="A">A</div>
+          <div class="rank" data-r="S">S</div><div class="rank" data-r="SS">SS</div><div class="rank" data-r="SSS">SSS</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+<script>
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const safe = x => (x==null ? '' : String(x));
+const dedup = arr => [...new Set(arr)];
+const sortDigits = s => s.split('').sort().join('');
+async function getJSON(p){ const r=await fetch(p,{cache:'no-store'}); if(!r.ok) throw new Error(p+' → '+r.status); return r.json(); }
+
+/* Level & rank */
+function levelTitle(total){ if(total>=100) return 'Master'; if(total>=76) return 'Advanced II'; if(total>=51) return 'Advanced I'; if(total>=26) return 'Apprentice'; return 'Aspirant'; }
+function baseRankFor(level){ return level==='Master'?'B':level==='Advanced II'?'C':level==='Advanced I'?'D':level==='Apprentice'?'E':'F'; }
+function countVerifications(){ try{ const v=JSON.parse(localStorage.getItem('venguild_verifications')||'{}')||{}; return ['twoIDs','employment','diploma','tor','address','payslip','billing','ecommerce'].reduce((n,k)=>n+(v[k]?1:0),0);}catch{return 0;} }
+function finalRankFor(level){ const L=['F','E','D','C','B','A','S']; const b=L.indexOf(baseRankFor(level)); const steps=Math.min(countVerifications(), L.length-1-b); return L[b+steps]; }
+
+/* Colors for orbs */
+const ORB_COLOR = { '1': '#8b5a2b','2': '#ff2a2a','3': '#ffffff','4': '#00d2ff','5': '#37e07d' };
+
+/* Required level → bucket */
+function reqBucket(total){ if (total >= 100) return 100; if (total > 50) return 50; return 0; }
+
+/* -------- Result Combination (robust) -------- */
+function computeBreakdown(result){
+  // Accept several shapes: result.breakdown or result.tallies or top-level groups
+  const src = result?.breakdown || result?.tallies || result || {};
+  const gkeys = { AD:['AD','A_D','ad'], VE:['VE','V_E','ve'], NT:['NT','N_T','nt'], UR:['UR','U_R','ur'], ER:['ER','E_R','er'] };
+
+  function findGroup(keyList){
+    for(const k of keyList){
+      const hit = src[k] ?? src[k.toLowerCase?.()] ?? null;
+      if(hit && typeof hit==='object') return hit;
+    }
+    return {};
+  }
+  function num(o, ...names){
+    for(const n of names){ const v = o?.[n]; if(v!=null && !isNaN(Number(v))) return Number(v); }
+    return 0;
+  }
+  function pick(group,leftKey,rightKey){
+    const o = findGroup(group);
+    // allow synonymous neutral keys
+    const l = num(o,leftKey,leftKey?.toLowerCase?.());
+    const r = num(o,rightKey,rightKey?.toLowerCase?.());
+    const nt = num(o,'NT','nt','Neutral','neutral');
+    return [l,r,nt];
+  }
+
+  const AD = pick(gkeys.AD,'A','D');
+  const VE = pick(gkeys.VE,'V','E');
+  const NT = pick(gkeys.NT,'N','T'); // neutral group N/T uses N vs T plus NT neutral
+  const UR = pick(gkeys.UR,'U','R');
+  const ER = pick(gkeys.ER,'E','R');
+
+  const lines = [
+    ['A/D', AD], ['V/E', VE], ['N/T', NT], ['U/R', UR], ['E/R', ER]
+  ].map(([lbl,vals]) => `${lbl} - ${vals[0]}${lbl[0]}, ${vals[1]}${lbl[2]}, ${vals[2]}NT`);
+
+  return lines;
+}
+
+function populateResultPopover({advr, ER, lines}){
+  const pop = $('#resultPopover');
+  pop.innerHTML = '';
+
+  // Header rows for ADVR + ER as requested
+  const h1 = document.createElement('div'); h1.className='row';
+  h1.innerHTML = `<div class="k">ADVR</div><div class="v">${advr || '—'}</div>`;
+  const h2 = document.createElement('div'); h2.className='row';
+  h2.innerHTML = `<div class="k">E/R</div><div class="v">${ER || '—'}</div>`;
+  pop.append(h1,h2);
+
+  lines.forEach(line=>{
+    const row = document.createElement('div'); row.className='row';
+    const [left,right] = line.split(' - ');
+    const k = document.createElement('div'); k.className = 'k'; k.textContent = left;
+    const v = document.createElement('div'); v.className = 'v'; v.textContent = right || '';
+    row.append(k,v); pop.appendChild(row);
+  });
+}
+
+// Toggle for result pop
+(function setUpBadge(){
+  const badge = $('#resultBadge');
+  const pop = $('#resultPopover');
+  if (!badge || !pop) return;
+  badge.addEventListener('click', ()=>{ pop.classList.toggle('show'); });
+  document.addEventListener('click', (e)=>{ if (!pop.contains(e.target) && e.target!==badge) pop.classList.remove('show'); });
+})();
+
+/* -------- Alter archetype -------- */
+function initAlter({ gCode='m', advr='', currentRow=null, isSlime=false }={}){
+  const badge = $('#alterBadge'); const pop = $('#alterPopover'); const grid = $('#evoGrid'); const explore = $('#alterExplore');
+  if(!badge||!pop||!grid) return;
+
+  async function build(){
+    grid.innerHTML = '';
+    if(isSlime){
+      explore.href = 'monsters.html';
+      const base = card('assets/default/creep.png', 'Primordial Slime', '—'); base.classList.add('base-cell');
+      grid.appendChild(base); return;
+    }
+
+    let jobs=[]; try{ jobs = await getJSON('data/adventurer_jobs.json'); }catch(e){}
+
+    const findBy = (rl,erStrict) => {
+      // STRICT by ADVR (never pass currentRow so base always the ADVR base like Medic)
+      let row = (jobs||[]).find(j =>
+        Number(j['Required Level']||0)===rl &&
+        String(j['ADVR Code']||'').toUpperCase()===advr &&
+        (erStrict? String(j['Exalted/Rooted']||'').toUpperCase()===erStrict : true)
+      );
+      if(!row && rl!==0){
+        // fallback to any ER for that ADVR if strict not found
+        row = (jobs||[]).find(j => Number(j['Required Level']||0)===rl && String(j['ADVR Code']||'').toUpperCase()===advr);
+      }
+      return row || null;
+    };
+
+    const baseRow = findBy(0,null);       // base must be ADVR-only (e.g., Medic)
+    const advE    = findBy(50,'E');
+    const advR    = findBy(50,'R');
+    const mstE    = findBy(100,'E');
+    const mstR    = findBy(100,'R');
+
+    // cards
+    const baseCard = makeCard(baseRow,gCode); baseCard.classList.add('base-cell'); grid.appendChild(baseCard);
+
+    const adv1 = makeCard(advE,gCode);  adv1.classList.add('row1-adv'); grid.appendChild(adv1);
+    const arr1 = document.createElement('div'); arr1.className='arrow-col'; arr1.style.gridRow='1 / 2'; grid.appendChild(arr1);
+    const mst1 = makeCard(mstE,gCode);  mst1.classList.add('row1-master'); grid.appendChild(mst1);
+
+    const adv2 = makeCard(advR,gCode);  adv2.classList.add('row2-adv'); grid.appendChild(adv2);
+    const arr2 = document.createElement('div'); arr2.className='arrow-col'; arr2.style.gridRow='2 / 3'; grid.appendChild(arr2);
+    const mst2 = makeCard(mstR,gCode);  mst2.classList.add('row2-master'); grid.appendChild(mst2);
+
+    // highlight whichever matches current character
+    const curFC = safe(currentRow?.['Final Code']||'').replace(/^@/,'').toLowerCase();
+    [adv1,mst1,adv2,mst2].forEach(el=>{
+      const fc = el?.dataset?.fc || '';
+      if(fc && curFC && fc===curFC) el.classList.add('current');
+    });
+
+    explore.href = 'archetypes.html';
+  }
+
+  function imgFor(row, g){
+    const fc = safe(row?.['Final Code']||'').replace(/^@/,'').toLowerCase();
+    return { src: fc ? `assets/adventurers/${fc}_${g}.png` : 'assets/default/creep.png', fc };
+  }
+  function labelRank(row){ return safe(row?.Rank || row?.['Guild Rank'] || row?.['Rank Recommendation'] || row?.['Exalted/Rooted'] || '—'); }
+  function makeCard(row,g){
+    const {src,fc} = imgFor(row,g);
+    const wrap=document.createElement('div'); wrap.className='thumb-card'; wrap.dataset.fc = fc || '';
+    const img=document.createElement('img'); img.src=src; img.alt=(row?.['Job Class']||'Class');
+    const cap=document.createElement('div'); cap.className='thumb-cap';
+    const title=row?.['Job Class']||'—'; const rank=labelRank(row);
+    cap.textContent = title + (rank && rank!=='—' ? ` • ${rank}` : '');
+    wrap.append(img,cap); return wrap;
+  }
+
+  let built=false;
+  badge.addEventListener('click', async ()=>{ if(!built){ await build(); built=true; } pop.classList.toggle('show'); });
+  document.addEventListener('click', (e)=>{ if (!pop.contains(e.target) && e.target!==badge) pop.classList.remove('show'); });
+}
+
+/* ---------- main ---------- */
+(async function main(){
+  const profileRaw = localStorage.getItem('venguild_complete_profile');
+  const resultRaw  = localStorage.getItem('venguild_personality');
+  if (!profileRaw || !resultRaw){
+    $('#greeting').textContent = 'We need your profile and a test result to reveal your archetype. Please complete both.';
+    return;
+  }
+  const profile = JSON.parse(profileRaw);
+  const result  = JSON.parse(resultRaw);
+
+  /* Totals */
+  const expTotal = (profile.experience||[]).reduce((s,x)=> s + Number(x.computedLevel || (x.years||0)*(x.multiplier||0)), 0);
+  const eduTotal = (profile.education||[]).reduce((s,x)=> s + Number(x.multiplier||0), 0);
+  const totalRaw = expTotal + eduTotal;
+  const totalDisplay = totalRaw===0 ? 1 : totalRaw;
+  const title    = levelTitle(totalDisplay);
+  const rank     = finalRankFor(title);
+  const bucket   = reqBucket(totalDisplay);
+
+  $('#greeting').textContent = `The Guild has weighed your essence, ${safe(profile?.name?.first||'Adventurer')}.`;
+  $('#totalPill').textContent = `Total Level: ${totalDisplay}`;
+  $('#lvl').textContent = totalDisplay;
+  $('#rankBox').textContent = rank;
+  for (const c of document.querySelectorAll('#levelChips .chip')) c.classList.toggle('active', c.dataset.level===title);
+  for (const r of document.querySelectorAll('#rankRow .rank'))   r.classList.toggle('active', r.dataset.r===rank);
+  if (totalRaw===0){
+    const note = $('#lvlNote');
+    note.textContent = "You're set to Level 1 by default — you haven't added work experience or education yet. That's fine — you're starting now.";
+    note.style.display='block';
+  }
+
+  /* Personality fields */
+  const advr = safe(result.advrCode || result.code4 || (result.code||'').split('-')[0] || '').toUpperCase();
+  const ERraw = safe(result.exaltedRooted || result.ER || ((result.code||'').split('-')[1]||'')).toUpperCase();
+  const suffix = (bucket === 0) ? '' : ((ERraw === 'E' || ERraw === 'R') ? `-${ERraw}` : '');
+  const personalityKey = advr + suffix;
+
+  /* Region / gender */
+  let regionCode = '';
+  try{
+    const countries = await getJSON('data/country_ethnicity.json');
+    const c = (countries||[]).find(x => safe(x.Country||x.country||x.name).toLowerCase() === safe(profile.citizenship).toLowerCase());
+    if (c){ const rc=safe(c.code||c.Code||c.region||''); regionCode = rc.startsWith('_') ? rc.slice(1) : rc; }
+  }catch{}
+  const g = (profile.gender||'').toLowerCase(); const gCode = (g==='m'||g==='male')?'m':'f';
+
+  /* Job mapping */
+  let jobRow=null;
+  try{
+    const jobs = await getJSON('data/adventurer_jobs.json');
+    const byPersonality = (jobs||[]).find(j =>
+      Number(j['Required Level'] ?? 0) === bucket &&
+      String(j['Personality'] || '').toUpperCase() === personalityKey
+    );
+    const byFields = (jobs||[]).find(j =>
+      Number(j['Required Level'] ?? 0) === bucket &&
+      String(j['ADVR Code']||'').toUpperCase() === advr &&
+      (bucket === 0 ? true : String(j['Exalted/Rooted']||'').toUpperCase() === (ERraw||''))
+    );
+    const byADVROnly = (jobs||[]).find(j =>
+      Number(j['Required Level'] ?? 0) === bucket &&
+      String(j['ADVR Code']||'').toUpperCase() === advr
+    );
+    jobRow = byPersonality || byFields || byADVROnly || null;
+  }catch(e){ console.warn('adventurer_jobs.json failed:', e?.message||e); }
+
+  // Paint job panel
+  const jobClass = jobRow?.['Job Class'] || '—';
+  const jobType  = jobRow?.['Job Type']  || '—';
+  const epithet  = jobRow?.Epiteth       || '—';
+  const desc     = jobRow?.Description   || '—';
+  const finalCode = safe(jobRow?.['Final Code'] || '').replace(/^@/,'').toLowerCase();
+
+  $('#typeChip').textContent  = `Type: ${jobType || '—'}`;
+  $('#jobHead').textContent   = (jobClass && epithet) ? `${jobClass} (${epithet})` : (jobClass || epithet || '—');
+  $('#jobClass').textContent  = jobClass || '—';
+  $('#description').textContent = desc || '—';
+
+  // Result Combination popover content (now robust + shows ADVR/ER)
+  const lines = computeBreakdown(result);
+  populateResultPopover({advr, ER: ERraw, lines});
+
+  // Hero asset (+ inline error)
+  const hero  = $('#imgHero');
+  const aerr  = $('#assetError');
+  let attemptedPath = '';
+  function setHero(src){
+    attemptedPath = src;
+    const prev = hero.onload;
+    hero.onload = ()=>{ prev?.(); hero.classList.add('loaded'); aerr.style.display='none'; };
+    hero.onerror = ()=>{ hero.src = 'assets/default/creep.png'; aerr.textContent = `Could not load hero asset: ${attemptedPath}`; aerr.style.display='block'; };
+    hero.src = src;
+  }
+  const slimeMode = (!advr || advr.length < 2 || !finalCode);
+  if (!advr || advr.length < 2){
+    setHero('assets/default/creep.png');
+    $('#jobHead').textContent = "☣️ Primordial Slime (Unformed)";
+    $('#jobClass').textContent = "Neutral • Unattuned • Pre-Archetype";
+    $('#description').textContent = "Your current answers balanced so evenly that no clear archetype awakened. It isn’t failure; it’s raw material. Retake the assessment and let intent crystallize.";
+  } else if (finalCode){
+    setHero(`assets/adventurers/${finalCode}_${gCode}.png`);
+    hero.classList.add('alive','shiny');
+  } else {
+    setHero('assets/default/creep.png');
+  }
+
+  // Professional image
+  const top = (profile.experience||[]).slice().sort((a,b)=> (b.computedLevel||0) - (a.computedLevel||0))[0];
+  const pro = $('#imgPro');
+  if (top?.code && regionCode){
+    const proPath = `assets/professional/${String(top.code).trim()}_${gCode}_${regionCode}.png`;
+    pro.onload = ()=> { pro.classList.add('loaded','alive'); };
+    pro.onerror = ()=> pro.style.display='none';
+    pro.src = proPath;
+  } else { pro.style.display='none'; }
+
+  /* Elemental Affinity */
+  const [sectors, programs, elementsFile] = await Promise.all([
+    getJSON('data/sectors.json').catch(()=>[]),
+    getJSON('data/programs.json').catch(()=>[]),
+    getJSON('data/elements.json').catch(()=>[])
+  ]);
+  const sectorCodeToElem = new Map((sectors||[]).map(s=>[ String(s.Code||s.code||'').trim(), Number(s.ElementCode||s.elementCode||0) ]));
+  const progToElem = (programs||[]).reduce((m,p)=>{ m[String(p.Program||p.title||'').trim().toLowerCase()] = Number(p.ElementCode||p.elementCode||0); return m; },{});
+  const expElems = (profile.experience||[]).map(x=> sectorCodeToElem.get(String(x.code||'').trim()) || 0);
+  const eduElems = (profile.education||[]).map(e=> progToElem[String(e.program||'').trim().toLowerCase()] || 0);
+  const comboKey = sortDigits(dedup([...expElems, ...eduElems].filter(Boolean).map(String)).join(''));
+  let comboName='—', comboDesc='—';
+  if (comboKey && Array.isArray(elementsFile) && elementsFile.length){
+    const hit = elementsFile.find(it => sortDigits(String(it.Code||it.code||''))===comboKey);
+    comboName = hit ? (hit.Combination||hit.name||hit.title||'—') : '—';
+    comboDesc = hit ? (hit.Description||hit.description||'—') : '—';
+  } else if (!comboKey){
+    comboName = 'Elemental Affinity';
+    comboDesc = 'Add work experience or education in your profile to reveal your elemental blend.';
+  }
+  $('#elemTitle').textContent = comboName || '—';
+  $('#elemDesc').textContent  = comboDesc || '—';
+
+  const digits = (comboKey||'').split('').filter(d => ORB_COLOR[d]);
+  const track = $('#orbTrack');
+  if (!digits.length){ track.parentElement.style.display='none'; }
+  else{
+    const spacing = 50, R = 50;
+    track.style.setProperty('--speed', (digits.length===1?'18s':digits.length===2?'20s':'22s'));
+    track.innerHTML = '';
+    digits.forEach((d,i)=>{
+      const wrap = document.createElement('div');
+      wrap.className = 'orb-wrap'; wrap.style.setProperty('--phase', (i*spacing)+'deg'); wrap.style.setProperty('--R', R+'px');
+      const orb = document.createElement('div'); orb.className = 'orb'; orb.style.setProperty('--c', ORB_COLOR[d]); orb.style.setProperty('--size', ({'1':28,'2':27,'3':26,'4':26,'5':25}[d]||26));
+      wrap.appendChild(orb); track.appendChild(wrap);
+    });
+  }
+
+  // Alter archetype grid (base = ADVR-only; highlight current)
+  initAlter({ gCode, advr, currentRow: jobRow, isSlime: slimeMode });
+})();
+</script>
+</body>
+</html>
